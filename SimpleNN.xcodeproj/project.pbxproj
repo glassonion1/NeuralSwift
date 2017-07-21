@@ -14,8 +14,10 @@
 		6E9309291F1F192B00670D68 /* NeuralNetwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E9309261F1F192B00670D68 /* NeuralNetwork.swift */; };
 		6E93092A1F1F192B00670D68 /* Vector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E9309271F1F192B00670D68 /* Vector.swift */; };
 		6E93092C1F1F1D4A00670D68 /* Operators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E93092B1F1F1D4A00670D68 /* Operators.swift */; };
+
 		DAF488D01F1F5BC80002DE51 /* mnist_test_10.csv in Resources */ = {isa = PBXBuildFile; fileRef = DAF488CE1F1F5BC80002DE51 /* mnist_test_10.csv */; };
 		DAF488D11F1F5BC80002DE51 /* mnist_train_100.csv in Resources */ = {isa = PBXBuildFile; fileRef = DAF488CF1F1F5BC80002DE51 /* mnist_train_100.csv */; };
+
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,8 +41,10 @@
 		6E9309261F1F192B00670D68 /* NeuralNetwork.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NeuralNetwork.swift; sourceTree = "<group>"; };
 		6E9309271F1F192B00670D68 /* Vector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Vector.swift; sourceTree = "<group>"; };
 		6E93092B1F1F1D4A00670D68 /* Operators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Operators.swift; sourceTree = "<group>"; };
+
 		DAF488CE1F1F5BC80002DE51 /* mnist_test_10.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mnist_test_10.csv; sourceTree = "<group>"; };
 		DAF488CF1F1F5BC80002DE51 /* mnist_train_100.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mnist_train_100.csv; sourceTree = "<group>"; };
+
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,8 +100,10 @@
 		6E9309181F1F18EC00670D68 /* SimpleNNTests */ = {
 			isa = PBXGroup;
 			children = (
+
 				DAF488CE1F1F5BC80002DE51 /* mnist_test_10.csv */,
 				DAF488CF1F1F5BC80002DE51 /* mnist_train_100.csv */,
+
 				6E9309191F1F18EC00670D68 /* SimpleNNTests.swift */,
 				6E93091B1F1F18EC00670D68 /* Info.plist */,
 			);
@@ -207,8 +213,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+
 				DAF488D01F1F5BC80002DE51 /* mnist_test_10.csv in Resources */,
 				DAF488D11F1F5BC80002DE51 /* mnist_train_100.csv in Resources */,
+
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
