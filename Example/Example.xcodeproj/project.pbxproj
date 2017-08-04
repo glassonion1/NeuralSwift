@@ -15,6 +15,8 @@
 		6E4684781F2242F500AF7442 /* SimpleNN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E4684771F2242F500AF7442 /* SimpleNN.framework */; };
 		6E46847B1F224A5C00AF7442 /* mnist_test_10.csv in Resources */ = {isa = PBXBuildFile; fileRef = 6E4684791F224A5C00AF7442 /* mnist_test_10.csv */; };
 		6E46847C1F224A5C00AF7442 /* mnist_train_100.csv in Resources */ = {isa = PBXBuildFile; fileRef = 6E46847A1F224A5C00AF7442 /* mnist_train_100.csv */; };
+		6E46847F1F224E6A00AF7442 /* mnist_test.csv in Resources */ = {isa = PBXBuildFile; fileRef = 6E46847D1F224E6A00AF7442 /* mnist_test.csv */; };
+		6E4684801F224E6A00AF7442 /* mnist_train.csv in Resources */ = {isa = PBXBuildFile; fileRef = 6E46847E1F224E6A00AF7442 /* mnist_train.csv */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +30,8 @@
 		6E4684771F2242F500AF7442 /* SimpleNN.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SimpleNN.framework; path = "../../../Library/Developer/Xcode/DerivedData/SimpleNN-baeebtxuiwjlkraxprzbndpbldbw/Build/Products/Debug-iphonesimulator/SimpleNN.framework"; sourceTree = "<group>"; };
 		6E4684791F224A5C00AF7442 /* mnist_test_10.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mnist_test_10.csv; sourceTree = "<group>"; };
 		6E46847A1F224A5C00AF7442 /* mnist_train_100.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mnist_train_100.csv; sourceTree = "<group>"; };
+		6E46847D1F224E6A00AF7442 /* mnist_test.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mnist_test.csv; sourceTree = "<group>"; };
+		6E46847E1F224E6A00AF7442 /* mnist_train.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mnist_train.csv; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +66,8 @@
 		6E46845F1F22425E00AF7442 /* Example */ = {
 			isa = PBXGroup;
 			children = (
+				6E46847D1F224E6A00AF7442 /* mnist_test.csv */,
+				6E46847E1F224E6A00AF7442 /* mnist_train.csv */,
 				6E4684791F224A5C00AF7442 /* mnist_test_10.csv */,
 				6E46847A1F224A5C00AF7442 /* mnist_train_100.csv */,
 				6E4684601F22425E00AF7442 /* AppDelegate.swift */,
@@ -143,7 +149,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				6E46846B1F22425E00AF7442 /* LaunchScreen.storyboard in Resources */,
+				6E4684801F224E6A00AF7442 /* mnist_train.csv in Resources */,
 				6E46847C1F224A5C00AF7442 /* mnist_train_100.csv in Resources */,
+				6E46847F1F224E6A00AF7442 /* mnist_test.csv in Resources */,
 				6E46847B1F224A5C00AF7442 /* mnist_test_10.csv in Resources */,
 				6E4684681F22425E00AF7442 /* Assets.xcassets in Resources */,
 				6E4684661F22425E00AF7442 /* Main.storyboard in Resources */,

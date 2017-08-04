@@ -15,11 +15,6 @@ class ViewController: UIViewController {
     @IBOutlet weak var progress: UIProgressView!
     @IBOutlet weak var button: UIButton!
     
-    var nn = NeuralNetwork(inputLayerSize: 28 * 28,
-                           hiddenLayerSize: 100,
-                           outputLayerSize: 10,
-                           learningRate: 0.3)
-    
     override func viewDidLoad() {
         super.viewDidLoad()
     }
@@ -35,7 +30,7 @@ class ViewController: UIViewController {
 
     @IBAction private func startTraining(_ sender: AnyObject) {
         
-        state.text = "start training"
+        state.text = "training start"
         
         button.isEnabled = false
         
@@ -45,12 +40,16 @@ class ViewController: UIViewController {
     }
     
     func train() {
-        guard let trainingPath = Bundle.main.path(forResource: "mnist_train_100", ofType: "csv") else {
+        guard let trainingPath = Bundle.main.path(forResource: "mnist_train", ofType: "csv") else {
             return
         }
-        guard let testPath = Bundle.main.path(forResource: "mnist_test_10", ofType: "csv") else {
+        guard let testPath = Bundle.main.path(forResource: "mnist_test", ofType: "csv") else {
             return
         }
+        var nn = NeuralNetwork(inputLayerSize: 28 * 28,
+                               hiddenLayerSize: 100,
+                               outputLayerSize: 10,
+                               learningRate: 0.3)
         do {
             // training
             let trainingCsv = try String(contentsOfFile: trainingPath, encoding: String.Encoding.utf8)
@@ -62,21 +61,28 @@ class ViewController: UIViewController {
                 let inputs = data.dropFirst().map { (Double($0)! / 255.0 * 0.99) + 0.01 }
                 return (answer, inputs)
             }
-
-            print("training...")
-            var count = 0
-            list.forEach { (answer, inputs) in
-                var targets = [Double](repeating: 0.01, count: 10)
-                targets[answer] = 0.99
-                nn.train(inputList: inputs, targetList: targets)
-                count += 1
-                DispatchQueue.main.async {
-                    self.progress.setProgress(Float(count) / Float(trainingList.count), animated: true)
-                }
-                print(Float(count) / Float(list.count))
+            
+            DispatchQueue.main.async {
+                self.state.text = "training..."
             }
             
-            print("training end")
+            let epoch = 2
+            var count = 0
+            for _ in 0..<epoch {
+                list.forEach { (answer, inputs) in
+                    var targets = [Double](repeating: 0.01, count: 10)
+                    targets[answer] = 0.99
+                    nn.train(inputList: inputs, targetList: targets)
+                    count += 1
+                    DispatchQueue.main.async {
+                        self.progress.setProgress(Float(count) / Float(trainingList.count * epoch), animated: true)
+                    }
+                }
+            }
+            
+            DispatchQueue.main.async {
+                self.state.text = "training end"
+            }
             
             // test
             let testCsv = try String(contentsOfFile: testPath, encoding: String.Encoding.utf8)
