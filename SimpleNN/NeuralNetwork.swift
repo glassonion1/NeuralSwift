@@ -29,11 +29,11 @@ public struct NeuralNetwork {
         w2 = Matrix(rows: outputLayerSize, cols: hiddenLayerSize)
     }
     
-    func transmission(weight: Matrix, inputs: Vector) -> Vector {
+    func forward(weight: Matrix, inputs: Vector) -> Vector {
         return sigmoid(weight.dot(inputs))
     }
     
-    func backpropagation(inputs: Vector, outputs: Vector, errors: Vector) -> Matrix {
+    func backward(inputs: Vector, outputs: Vector, errors: Vector) -> Matrix {
         let columnVector = errors.multiply(outputs).multiply(outputs.filled(value: 1.0) - outputs)
         let rowVector = inputs.transpose()
         return learningRate * (columnVector * rowVector)
@@ -42,9 +42,9 @@ public struct NeuralNetwork {
     public func query(list: [Double]) -> [Double] {
         let inputs = Vector(array: list)
         
-        let hiddenOutputs = transmission(weight: w1, inputs: inputs)
+        let hiddenOutputs = forward(weight: w1, inputs: inputs)
         
-        let finalOutputs = transmission(weight: w2, inputs: hiddenOutputs)
+        let finalOutputs = forward(weight: w2, inputs: hiddenOutputs)
         
         return finalOutputs.toArray()
     }
@@ -52,9 +52,9 @@ public struct NeuralNetwork {
     public mutating func train(inputList: [Double], targetList: [Double]) {
         let inputs = Vector(array: inputList)
         
-        let hiddenOutputs = transmission(weight: w1, inputs: inputs)
+        let hiddenOutputs = forward(weight: w1, inputs: inputs)
         
-        let finalOutputs = transmission(weight: w2, inputs: hiddenOutputs)
+        let finalOutputs = forward(weight: w2, inputs: hiddenOutputs)
         
         let targets = Vector(array: targetList)
         
@@ -62,9 +62,9 @@ public struct NeuralNetwork {
         let hiddenErros = w2.transpose().dot(outputErrors)
         
         // Update weight2
-        w2 = w2 + backpropagation(inputs: hiddenOutputs, outputs: finalOutputs, errors: outputErrors)
+        w2 = w2 + backward(inputs: hiddenOutputs, outputs: finalOutputs, errors: outputErrors)
         
         // Update weight1
-        w1 = w1 + backpropagation(inputs: inputs, outputs: hiddenOutputs, errors: hiddenErros)
+        w1 = w1 + backward(inputs: inputs, outputs: hiddenOutputs, errors: hiddenErros)
     }
 }

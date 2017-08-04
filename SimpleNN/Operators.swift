@@ -6,7 +6,7 @@
 //  Copyright © 2017年 taisuke fujita. All rights reserved.
 //
 
-import Foundation
+import Accelerate
 
 func +(lhs: Vector, rhs: Vector) -> Vector {
     return lhs.sum(rhs)
@@ -18,6 +18,11 @@ func +(lhs: Matrix, rhs: Double) -> Matrix {
 
 func +(lhs: Matrix, rhs: Matrix) -> Matrix {
     return lhs.sum(rhs)
+}
+
+func -(lhs: Double, rhs: Vector) -> Vector {
+    let vector = Vector(value: lhs, rows: rhs.rows)
+    return vector.difference(rhs)
 }
 
 func -(lhs: Vector, rhs: Vector) -> Vector {
@@ -62,16 +67,49 @@ func *(lhs: Matrix, rhs: Matrix) -> Matrix {
     return lhs.dot(rhs)
 }
 
+func square(_ vector: Vector) -> Vector {
+    let array = vector.toArray()
+    var results = [Double](repeating: 0.0, count: array.count)
+    
+    vDSP_vsqD(array, 1, &results, 1, vDSP_Length(array.count))
+    
+    return Vector(array: results)
+}
+
 func sigmoid(_ scalar: Double) -> Double {
     return 1.0 / (1.0  + exp(-scalar))
 }
 
 func sigmoid(_ vector: Vector) -> Vector {
-    let exped = vector.toArray().map { sigmoid($0) }
-    return Vector(array: exped)
+    let array = vector.toArray().map { sigmoid($0) }
+    return Vector(array: array)
 }
 
-func sigmoid(_ matrix: Matrix) -> Matrix {
-    let exped = matrix.toArray().map { sigmoid($0) }
-    return Matrix(array: exped, cols: matrix.cols)
+// y = (sigmoid(x) * (1 - sigmoid(x))
+func sigmoidPrime(_ vector: Vector) -> Vector {
+    
+    return sigmoid(vector).multiply(Vector(value: 1.0, rows: vector.rows) - sigmoid(vector))
+}
+
+// y = (e^x / sum(e^x))
+func softmax(_ vector: Vector) -> Vector {
+    let exps = vector.buffer.map { exp($0) }
+    let sum = exps.reduce(0.0, +)
+    let y = exps.map { $0 / sum }
+    
+    return Vector(array: y)
+}
+
+func tanh(_ vector: Vector) -> Vector {
+    let array = vector.toArray()
+    var results = [Double](repeating: 0.0, count: array.count)
+    vvtanh(&results, array, [Int32(array.count)])
+    
+    return Vector(array: results)
+}
+
+// y = (1 - tanh(x)^2)
+func tanhPrime(_ vector: Vector) -> Vector {
+    
+    return Vector(value: 1, rows: vector.rows) - square(tanh(vector))
 }

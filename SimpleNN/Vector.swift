@@ -85,4 +85,9 @@ struct Vector {
         let matrix = Matrix(linearAlgebraObject: la)
         return matrix[0]
     }
+    
+    func outer(_ other: Vector) -> Matrix {
+        let new = la_outer_product(calculator.linearAlgebraObject, other.calculator.linearAlgebraObject)
+        return Matrix(linearAlgebraObject: new)
+    }
 }

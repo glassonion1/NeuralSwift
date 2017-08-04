@@ -11,6 +11,15 @@ import Accelerate
 import GameplayKit
 @testable import SimpleNN
 
+
+extension Array {
+    func chunks(_ chunkSize: Int) -> [[Element]] {
+        return stride(from: 0, to: self.count, by: chunkSize).map {
+            Array(self[$0..<Swift.min($0 + chunkSize, self.count)])
+        }
+    }
+}
+
 class SimpleNNTests: XCTestCase {
     
     override func setUp() {
@@ -86,19 +95,6 @@ class SimpleNNTests: XCTestCase {
         assert(v2[2] == 50.0)
     }
     
-    func testMatrix4() {
-        let weight = Matrix(array: [0.1, 0.3, 0.7, 0.9, 0.5, 0.2, 0.8, 0.4, 0.6], cols: 3)
-        let input = Matrix(array: [0.2, 0.4, 0.3])
-        // X = W * I
-        let result = weight.dot(input)
-        let output = sigmoid(result)
-        print(result.description)
-        XCTAssertEqualWithAccuracy(result[0], 0.35, accuracy: 0.01)
-        XCTAssertEqualWithAccuracy(result[1], 0.44, accuracy: 0.01)
-        XCTAssertEqualWithAccuracy(result[2], 0.5, accuracy: 0.01)
-        print(output.description)
-    }
-    
     func testRandomMatrix() {
         let count = 1000
         var sum = 0.0
@@ -151,6 +147,25 @@ class SimpleNNTests: XCTestCase {
         XCTAssertEqualWithAccuracy(c[2, 1], 40, accuracy: 0.001)
     }
     
+    func testVectorAdd() {
+        let a = Vector(array: [20, 30])
+        let b = Vector(array: [3, 1])
+        let c: Vector = a + b
+        print("add¥¥¥¥¥¥¥¥")
+        print(c)
+    }
+    
+    func testSoftmax() {
+        let test = Vector(array: [0.1,-0.9,0.3, 0.7])
+        
+        let softmaxed = softmax(test)
+        print("&&&&&testSoftmax&&&&&")
+        print(softmaxed)
+        
+        let sum = softmaxed.toArray().reduce(0.0, +)
+        XCTAssertEqualWithAccuracy(sum, 1.0, accuracy: 0.000001)
+    }
+    
     func testNNQuery() {
         let nn = NeuralNetwork(inputLayerSize: 3, hiddenLayerSize: 3, outputLayerSize: 3, learningRate: 0.3)
         let result = nn.query(list: [1.0, 0.5, -1.5])
@@ -171,7 +186,7 @@ class SimpleNNTests: XCTestCase {
         let nn = NeuralNetwork(inputLayerSize: 3, hiddenLayerSize: 3, outputLayerSize: 3, learningRate: 0.3)
         let weight = Matrix(array: [[0.9, 0.3, 0.4], [0.2, 0.8, 0.2], [0.1, 0.5, 0.6]])
         let inputs = Vector(array: [0.9, 0.1, 0.8])
-        let outputs = nn.transmission(weight: weight, inputs: inputs)
+        let outputs = nn.forward(weight: weight, inputs: inputs)
         XCTAssertEqualWithAccuracy(outputs[0], 0.761, accuracy: 0.001)
         XCTAssertEqualWithAccuracy(outputs[1], 0.603, accuracy: 0.001)
         XCTAssertEqualWithAccuracy(outputs[2], 0.650, accuracy: 0.001)
@@ -193,7 +208,7 @@ class SimpleNNTests: XCTestCase {
         let inputs = Vector(array: [0.4, 0.4, 0.4])
         let outputs = sigmoid(Vector(array: [2.3, 2.3, 2.3]))
         let errors = Vector(array: [0.8, 0.8, 0.8])
-        let results = nn.backpropagation(inputs: inputs, outputs: outputs, errors: errors)
+        let results = nn.backward(inputs: inputs, outputs: outputs, errors: errors)
         print(results)
         XCTAssertEqualWithAccuracy(results[0, 0], 0.002650, accuracy: 0.000001)
     }
@@ -273,4 +288,65 @@ class SimpleNNTests: XCTestCase {
             assertionFailure()
         }
     }
+    
+    func testRnnQuery() {
+        let data = [[1.0, 2.0], [0.5, 3.0]]
+        let target = [[0.5], [1.25]]
+        var rnn = LSTMNetwork(sequenceSize: data.count, inputDataLength: data[0].count, outputDataLength: target[0].count, learningRate: 0.1)
+        rnn.wa = Matrix(array: [[0.45, 0.25]])
+        rnn.wi = Matrix(array: [[0.95, 0.8]])
+        rnn.wf = Matrix(array: [[0.7, 0.45]])
+        rnn.wo = Matrix(array: [[0.6, 0.4]])
+        
+        rnn.ra = Matrix(array: [[0.15]])
+        rnn.ri = Matrix(array: [[0.8]])
+        rnn.rf = Matrix(array: [[0.1]])
+        rnn.ro = Matrix(array: [[0.25]])
+        
+        rnn.reset()
+        
+        //let results = rnn.query(lists: data)
+        //print("----testRnnQuery----")
+        //print(results)
+        print("^^^^^^^^")
+        print(rnn.wa)
+
+        rnn.train(inputLists: data, targetLists: target)
+        
+        print("^^^^^^^^")
+        print(rnn.wa)
+    }
+    
+    /*
+    func testRnnQuery2() {
+        let data: [[Double]] = [[0,0,1,0], [1,0,0,0], [0,0,0,1], [0,1,0,0], [1,0,0,0], [0,1,0,0]]
+        var rnn = LSTMNetwork(sequenceSize: data.count, inputDataLength: data[0].count, outputDataLength: data[0].count, learningRate: 0.01)
+        let results = rnn.query(lists: data)
+        
+        print("----testRnnQuery2----")
+        print(results)
+    }*/
+    
+    func testRnnTrain() {
+        let data: [[Double]] = [[0,0,1,0], [1,0,0,0], [0,1,0,0], [0,1,0,0], [0,0,1,0], [0,1,0,0]]
+        let targetData: [[Double]] = [[0,1,0,0], [1,0,0,0], [1,0,0,0], [0,1,0,0], [0,1,0,0], [0,1,0,0]]
+        var rnn = LSTMNetwork(sequenceSize: data.count, inputDataLength: data[0].count, outputDataLength: data[0].count, learningRate: 0.05)
+        
+        print("^^^^^^^^")
+        print(rnn.wa)
+        let epoch = 100
+        for _ in 0..<epoch {
+            rnn.train(inputLists: data, targetLists: targetData)
+        }
+        print("^^^^^^^^")
+        print(rnn.wa)
+        
+        let test: [[Double]] = [[0,0,1,0], [1,0,0,0], [0,1,0,0], [0,1,0,0], [0,0,1,0], [0,1,0,0]]
+        let results = rnn.query(lists: test)
+        
+        print("----testRnnTrain----")
+        print(results.map { softmax(Vector(array: $0)) })
+    }
+    
+    
 }
