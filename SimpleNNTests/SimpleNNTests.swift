@@ -292,7 +292,7 @@ class SimpleNNTests: XCTestCase {
     func testRnnQuery() {
         let data = [[1.0, 2.0], [0.5, 3.0]]
         let target = [[0.5], [1.25]]
-        var rnn = LSTMNetwork(sequenceSize: data.count, inputDataLength: data[0].count, outputDataLength: target[0].count, learningRate: 0.1)
+        var rnn = LSTMLayer(sequenceSize: data.count, inputDataLength: data[0].count, outputDataLength: target[0].count, learningRate: 0.1)
         rnn.wa = Matrix(array: [[0.45, 0.25]])
         rnn.wi = Matrix(array: [[0.95, 0.8]])
         rnn.wf = Matrix(array: [[0.7, 0.45]])
@@ -317,20 +317,10 @@ class SimpleNNTests: XCTestCase {
         print(rnn.wa)
     }
     
-    /*
-    func testRnnQuery2() {
-        let data: [[Double]] = [[0,0,1,0], [1,0,0,0], [0,0,0,1], [0,1,0,0], [1,0,0,0], [0,1,0,0]]
-        var rnn = LSTMNetwork(sequenceSize: data.count, inputDataLength: data[0].count, outputDataLength: data[0].count, learningRate: 0.01)
-        let results = rnn.query(lists: data)
-        
-        print("----testRnnQuery2----")
-        print(results)
-    }*/
-    
     func testRnnTrain() {
         let data: [[Double]] = [[0,0,1,0], [1,0,0,0], [0,1,0,0], [0,1,0,0], [0,0,1,0], [0,1,0,0]]
         let targetData: [[Double]] = [[0,1,0,0], [1,0,0,0], [1,0,0,0], [0,1,0,0], [0,1,0,0], [0,1,0,0]]
-        var rnn = LSTMNetwork(sequenceSize: data.count, inputDataLength: data[0].count, outputDataLength: data[0].count, learningRate: 0.05)
+        var rnn = LSTMLayer(sequenceSize: data.count, inputDataLength: data[0].count, outputDataLength: data[0].count, learningRate: 0.05)
         
         print("^^^^^^^^")
         print(rnn.wa)

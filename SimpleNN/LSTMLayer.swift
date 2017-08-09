@@ -9,7 +9,7 @@
 import Foundation
 
 // @see https://medium.com/@aidangomez/let-s-do-this-f9b699de31d9
-public struct LSTMNetwork {
+public struct LSTMLayer {
 
     let sequenceSize: Int
     
