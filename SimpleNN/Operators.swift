@@ -113,3 +113,13 @@ func tanhPrime(_ vector: Vector) -> Vector {
     
     return Vector(value: 1, rows: vector.rows) - square(tanh(vector))
 }
+
+func toOneHot(value: Int, maxValue: Int) -> [Double] {
+    var result = [Double](repeating: 0.0, count: maxValue + 1)
+    result[value] = 1.0
+    return result
+}
+
+func toOneHot(values: [Int], maxValue: Int) -> [[Double]] {
+    return values.map { toOneHot(value: $0, maxValue: maxValue) }
+}

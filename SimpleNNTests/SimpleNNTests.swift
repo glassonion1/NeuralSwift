@@ -318,25 +318,36 @@ class SimpleNNTests: XCTestCase {
     }
     
     func testRnnTrain() {
-        let data: [[Double]] = [[0,0,1,0], [1,0,0,0], [0,1,0,0], [0,1,0,0], [0,0,1,0], [0,1,0,0]]
-        let targetData: [[Double]] = [[0,1,0,0], [1,0,0,0], [1,0,0,0], [0,1,0,0], [0,1,0,0], [0,1,0,0]]
-        var rnn = LSTMLayer(sequenceSize: data.count, inputDataLength: data[0].count, outputDataLength: data[0].count, learningRate: 0.05)
         
-        print("^^^^^^^^")
-        print(rnn.wa)
-        let epoch = 100
+        // [1,1,2,3,1] [2,1,2,3,2] [3,1,2,3,3] [4,1,2,3,4] [5,1,2,3,5]
+        
+        let dataList: [[[Double]]] = [[1,1,2,3], [2,1,2,3], [3,1,2,3], [4,1,2,3], [5,1,2,3]].map { toOneHot(values: $0, maxValue: 5) }
+        let targetDataList: [[[Double]]] = [[1,2,3,1], [1,2,3,2], [1,2,3,3], [1,2,3,4], [1,2,3,5]].map { toOneHot(values: $0, maxValue: 5) }
+        var rnn = LSTMLayer(sequenceSize: 4, inputDataLength: 6, outputDataLength: 6, learningRate: 0.05)
+        
+        
+        let epoch = 1000
         for _ in 0..<epoch {
-            rnn.train(inputLists: data, targetLists: targetData)
+            for i in 0..<dataList.count {
+                let data = dataList[i]
+                let targetData = targetDataList[i]
+                print("@@@@@@")
+                print(data)
+                print(targetData)
+                print("@@@@@@")
+                rnn.train(inputLists: data, targetLists: targetData)
+            }
+            
         }
-        print("^^^^^^^^")
-        print(rnn.wa)
         
-        let test: [[Double]] = [[0,0,1,0], [1,0,0,0], [0,1,0,0], [0,1,0,0], [0,0,1,0], [0,1,0,0]]
+        let test: [[Double]] = toOneHot(values: [5,1,2,3], maxValue: 5)
         let results = rnn.query(lists: test)
         
-        print("----testRnnTrain----")
-        print(results.map { softmax(Vector(array: $0)) })
+        let expected = results.map { softmax(Vector(array: $0)) }.map { $0.toArray().index(of: $0.toArray().max()!)! }
+        
+        print("----testRnnTrain2----")
+        print(expected)
+        
+        XCTAssertTrue([1,2,3,5] == expected)
     }
-    
-    
 }
