@@ -9,15 +9,15 @@
 import Accelerate
 
 func +(lhs: Vector, rhs: Vector) -> Vector {
-    return lhs.sum(rhs)
+    return lhs.add(rhs)
 }
 
 func +(lhs: Matrix, rhs: Double) -> Matrix {
-    return lhs.sum(rhs)
+    return lhs.add(rhs)
 }
 
 func +(lhs: Matrix, rhs: Matrix) -> Matrix {
-    return lhs.sum(rhs)
+    return lhs.add(rhs)
 }
 
 func -(lhs: Double, rhs: Vector) -> Vector {
@@ -65,6 +65,11 @@ func *(lhs: Matrix, rhs: Vector) -> Vector {
 
 func *(lhs: Matrix, rhs: Matrix) -> Matrix {
     return lhs.dot(rhs)
+}
+
+func sum(_ vector: Vector) -> Double {
+    let array = vector.toArray()
+    return cblas_dasum(Int32(array.count), array, 1)
 }
 
 func square(_ vector: Vector) -> Vector {

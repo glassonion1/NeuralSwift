@@ -182,7 +182,7 @@ class SimpleNNTests: XCTestCase {
         XCTAssertNotEqualWithAccuracy(result[2], result2[2], 0.0001)
     }
     
-    func testTransmission() {
+    func testForward() {
         let nn = NeuralNetwork(inputLayerSize: 3, hiddenLayerSize: 3, outputLayerSize: 3, learningRate: 0.3)
         let weight = Matrix(array: [[0.9, 0.3, 0.4], [0.2, 0.8, 0.2], [0.1, 0.5, 0.6]])
         let inputs = Vector(array: [0.9, 0.1, 0.8])
@@ -289,65 +289,40 @@ class SimpleNNTests: XCTestCase {
         }
     }
     
-    func testRnnQuery() {
-        let data = [[1.0, 2.0], [0.5, 3.0]]
-        let target = [[0.5], [1.25]]
-        var rnn = LSTMLayer(sequenceSize: data.count, inputDataLength: data[0].count, outputDataLength: target[0].count, learningRate: 0.1)
-        rnn.wa = Matrix(array: [[0.45, 0.25]])
-        rnn.wi = Matrix(array: [[0.95, 0.8]])
-        rnn.wf = Matrix(array: [[0.7, 0.45]])
-        rnn.wo = Matrix(array: [[0.6, 0.4]])
-        
-        rnn.ra = Matrix(array: [[0.15]])
-        rnn.ri = Matrix(array: [[0.8]])
-        rnn.rf = Matrix(array: [[0.1]])
-        rnn.ro = Matrix(array: [[0.25]])
-        
-        rnn.reset()
-        
-        //let results = rnn.query(lists: data)
-        //print("----testRnnQuery----")
-        //print(results)
-        print("^^^^^^^^")
-        print(rnn.wa)
-
-        rnn.train(inputLists: data, targetLists: target)
-        
-        print("^^^^^^^^")
-        print(rnn.wa)
-    }
-    
-    func testRnnTrain() {
+    func testLstmTrain() {
         
         // [1,1,2,3,1] [2,1,2,3,2] [3,1,2,3,3] [4,1,2,3,4] [5,1,2,3,5]
+        let maxValue = 6
         
-        let dataList: [[[Double]]] = [[1,1,2,3], [2,1,2,3], [3,1,2,3], [4,1,2,3], [5,1,2,3]].map { toOneHot(values: $0, maxValue: 5) }
-        let targetDataList: [[[Double]]] = [[1,2,3,1], [1,2,3,2], [1,2,3,3], [1,2,3,4], [1,2,3,5]].map { toOneHot(values: $0, maxValue: 5) }
-        var rnn = LSTMLayer(sequenceSize: 4, inputDataLength: 6, outputDataLength: 6, learningRate: 0.05)
+        let dataList: [[[Double]]] = [[0,1,2,3], [1,1,2,3], [2,1,2,3], [3,1,2,3], [4,1,2,3], [5,1,2,3], [4,1,2,3]].map { toOneHot(values: $0, maxValue: maxValue) }
+        let targetDataList: [[[Double]]] = [[1,2,3,0], [1,2,3,1], [1,2,3,2], [1,2,3,3], [1,2,3,4], [1,2,3,5], [1,2,3,4]].map { toOneHot(values: $0, maxValue: maxValue) }
+        var rnn = LSTMNetwork(sequenceSize: 4, inputDataLength: maxValue + 1, outputDataLength: maxValue + 1, learningRate: 0.08)
         
         
         let epoch = 1000
+        var lossData = ""
         for _ in 0..<epoch {
             for i in 0..<dataList.count {
                 let data = dataList[i]
                 let targetData = targetDataList[i]
-                print("@@@@@@")
-                print(data)
-                print(targetData)
-                print("@@@@@@")
-                rnn.train(inputLists: data, targetLists: targetData)
+                let loss = rnn.train(inputLists: data, targetLists: targetData)
+                lossData += "\(loss)\n"
             }
-            
         }
         
-        let test: [[Double]] = toOneHot(values: [5,1,2,3], maxValue: 5)
+        print(lossData)
+        try! lossData.write(toFile: "lossData", atomically: true, encoding: .utf8)
+        
+        let test: [[Double]] = toOneHot(values: [0,1,2,3], maxValue: maxValue)
         let results = rnn.query(lists: test)
         
         let expected = results.map { softmax(Vector(array: $0)) }.map { $0.toArray().index(of: $0.toArray().max()!)! }
-        
+        //let expected = results.map { Vector(array: $0) }.map { $0.toArray().index(of: $0.toArray().max()!)! }
+
         print("----testRnnTrain2----")
+        print(results)
         print(expected)
         
-        XCTAssertTrue([1,2,3,5] == expected)
+        XCTAssertTrue([1,2,3,0] == expected)
     }
 }

@@ -84,12 +84,12 @@ struct Matrix {
         return Matrix(linearAlgebraObject: la)
     }
     
-    func sum(_ other: Double) -> Matrix {
+    func add(_ other: Double) -> Matrix {
         let la = la_sum(linearAlgebraObject, filled(value: other).linearAlgebraObject)
         return Matrix(linearAlgebraObject: la)
     }
     
-    func sum(_ other: Matrix) -> Matrix {
+    func add(_ other: Matrix) -> Matrix {
         let la = la_sum(linearAlgebraObject, other.linearAlgebraObject)
         return Matrix(linearAlgebraObject: la)
     }

@@ -9,7 +9,7 @@
 import Foundation
 
 // @see https://medium.com/@aidangomez/let-s-do-this-f9b699de31d9
-public struct LSTMLayer {
+public struct LSTMNetwork {
 
     let sequenceSize: Int
     
@@ -61,25 +61,6 @@ public struct LSTMLayer {
         self.lstms = lstmList
     }
     
-    func feedforward(x: Vector, state: (Vector, Vector)) -> (Vector, Vector) {
-        
-        assert(x.rows == wf.cols)
-        assert(state.0.rows == wf.rows)
-        assert(state.0.rows == rf.cols)
-        
-        let h = state.0
-        let cell = state.1
-        
-        let f = sigmoid(wf.dot(x) + rf.dot(h))
-        let i = sigmoid(wi.dot(x) + ri.dot(h))
-        let o = sigmoid(wo.dot(x) + ro.dot(h))
-        let g = tanh(wa.dot(x) + ra.dot(h))
-        
-        let newCell = i.multiply(g) + cell.multiply(f)
-        let newH = tanh(cell).multiply(o)
-        return (newH, newCell)
-    }
-    
     // data: onehot vectors
     public mutating func query(lists: [[Double]]) -> [[Double]] {
         
@@ -100,7 +81,7 @@ public struct LSTMLayer {
         return outputs
     }
     
-    public mutating func train(inputLists: [[Double]], targetLists: [[Double]]) {        
+    public mutating func train(inputLists: [[Double]], targetLists: [[Double]]) -> Double {
         let outputs = query(lists: inputLists)
         
         let dX = Vector(value: 0, rows: wf.rows)
@@ -108,12 +89,17 @@ public struct LSTMLayer {
         let dCell = Vector(value: 0, rows: wf.rows)
         var state = (dX, dY, dCell)
         var deltas = [[String: Vector]]()
+        var totalLoss = 0.0
         
         for i in (0..<lstms.count).reversed() {
             let lstm = lstms[i]
             let output = Vector(array: outputs[i])
             let target = Vector(array: targetLists[i])
             let deltaX = output - target
+            
+            let l2Loss = sum(deltaX.multiply(deltaX) * 0.5)
+            totalLoss += l2Loss
+            
             let next = i + 1 > lstms.count - 1 ? LSTM(wf: wf, wi: wi, wo: wo, wa: wa, rf: rf, ri: ri, ro: ro, ra: ra) : lstms[i + 1]
             let result = lstm.backward(deltaX: deltaX, recurrentOut: state, nextForget: next.forgetGate)
             state.0 = result.0
@@ -162,5 +148,7 @@ public struct LSTMLayer {
         ro = ro - learningRate * dRo
         
         reset()
+        
+        return totalLoss / Double(outputs.count)
     }
 }

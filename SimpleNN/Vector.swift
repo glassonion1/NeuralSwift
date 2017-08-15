@@ -55,12 +55,12 @@ struct Vector {
         return Vector(calculator: calculator.scale(scalar))
     }
     
-    func sum(_ other: Double) -> Vector {
-        return Vector(calculator: calculator.sum(other))
+    func add(_ other: Double) -> Vector {
+        return Vector(calculator: calculator.add(other))
     }
     
-    func sum(_ other: Vector) -> Vector {
-        return Vector(calculator: calculator.sum(other.calculator))
+    func add(_ other: Vector) -> Vector {
+        return Vector(calculator: calculator.add(other.calculator))
     }
     
     func difference(_ other: Double) -> Vector {

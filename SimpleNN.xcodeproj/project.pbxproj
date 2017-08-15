@@ -17,7 +17,7 @@
 		DA15F2971F3080BD00176445 /* LSTM.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA15F2961F3080BD00176445 /* LSTM.swift */; };
 		DAF488D01F1F5BC80002DE51 /* mnist_test_10.csv in Resources */ = {isa = PBXBuildFile; fileRef = DAF488CE1F1F5BC80002DE51 /* mnist_test_10.csv */; };
 		DAF488D11F1F5BC80002DE51 /* mnist_train_100.csv in Resources */ = {isa = PBXBuildFile; fileRef = DAF488CF1F1F5BC80002DE51 /* mnist_train_100.csv */; };
-		DAF629D21F29EB6300D365C0 /* LSTMLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF629D11F29EB6300D365C0 /* LSTMLayer.swift */; };
+		DAF629D21F29EB6300D365C0 /* LSTMNetwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF629D11F29EB6300D365C0 /* LSTMNetwork.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,7 +44,7 @@
 		DA15F2961F3080BD00176445 /* LSTM.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LSTM.swift; sourceTree = "<group>"; };
 		DAF488CE1F1F5BC80002DE51 /* mnist_test_10.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mnist_test_10.csv; sourceTree = "<group>"; };
 		DAF488CF1F1F5BC80002DE51 /* mnist_train_100.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mnist_train_100.csv; sourceTree = "<group>"; };
-		DAF629D11F29EB6300D365C0 /* LSTMLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LSTMLayer.swift; sourceTree = "<group>"; };
+		DAF629D11F29EB6300D365C0 /* LSTMNetwork.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LSTMNetwork.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -92,7 +92,7 @@
 				6E9309261F1F192B00670D68 /* NeuralNetwork.swift */,
 				6E93092B1F1F1D4A00670D68 /* Operators.swift */,
 				DA15F2961F3080BD00176445 /* LSTM.swift */,
-				DAF629D11F29EB6300D365C0 /* LSTMLayer.swift */,
+				DAF629D11F29EB6300D365C0 /* LSTMNetwork.swift */,
 				6E93090E1F1F18EB00670D68 /* SimpleNN.h */,
 				6E93090F1F1F18EB00670D68 /* Info.plist */,
 			);
@@ -225,7 +225,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DAF629D21F29EB6300D365C0 /* LSTMLayer.swift in Sources */,
+				DAF629D21F29EB6300D365C0 /* LSTMNetwork.swift in Sources */,
 				DA15F2971F3080BD00176445 /* LSTM.swift in Sources */,
 				6E9309281F1F192B00670D68 /* Matrix.swift in Sources */,
 				6E93092C1F1F1D4A00670D68 /* Operators.swift in Sources */,

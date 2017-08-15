@@ -34,7 +34,7 @@ public struct NeuralNetwork {
     }
     
     func backward(inputs: Vector, outputs: Vector, errors: Vector) -> Matrix {
-        let columnVector = errors.multiply(outputs).multiply(outputs.filled(value: 1.0) - outputs)
+        let columnVector = errors.multiply(outputs).multiply(1.0 - outputs)
         let rowVector = inputs.transpose()
         return learningRate * (columnVector * rowVector)
     }
