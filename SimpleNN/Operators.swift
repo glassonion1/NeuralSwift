@@ -37,6 +37,10 @@ func -(lhs: Matrix, rhs: Matrix) -> Matrix {
     return lhs.difference(rhs)
 }
 
+func /(lhs: Vector, rhs: Double) -> Vector {
+    return lhs.scale(1.0 / rhs)
+}
+
 func *(lhs: Vector, rhs: Double) -> Vector {
     return lhs.scale(rhs)
 }
@@ -68,8 +72,12 @@ func *(lhs: Matrix, rhs: Matrix) -> Matrix {
 }
 
 func sum(_ vector: Vector) -> Double {
-    let array = vector.toArray()
-    return cblas_dasum(Int32(array.count), array, 1)
+    let x = vector.toArray()
+    
+    var result: Double = 0.0
+    vDSP_sveD(x, 1, &result, vDSP_Length(x.count))
+    
+    return result
 }
 
 func square(_ vector: Vector) -> Vector {
@@ -98,9 +106,10 @@ func sigmoidPrime(_ vector: Vector) -> Vector {
 
 // y = (e^x / sum(e^x))
 func softmax(_ vector: Vector) -> Vector {
-    let exps = vector.buffer.map { exp($0) }
-    let sum = exps.reduce(0.0, +)
-    let y = exps.map { $0 / sum }
+    let max = vector.toArray().max()!
+    let exps = vector.toArray().map { exp($0 - max) }
+    let total = sum(Vector(array: exps))
+    let y = exps.map { $0 / total }
     
     return Vector(array: y)
 }
@@ -116,7 +125,7 @@ func tanh(_ vector: Vector) -> Vector {
 // y = (1 - tanh(x)^2)
 func tanhPrime(_ vector: Vector) -> Vector {
     
-    return Vector(value: 1, rows: vector.rows) - square(tanh(vector))
+    return 1 - square(tanh(vector))
 }
 
 func toOneHot(value: Int, maxValue: Int) -> [Double] {

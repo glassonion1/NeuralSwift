@@ -10,11 +10,11 @@ import Foundation
 import Accelerate
 import GameplayKit
 
-struct Matrix {
+public struct Matrix: Variable {
 
+    fileprivate let buffer: [Double]
     let rows: Int
     let cols: Int
-    let buffer: [Double]
     
     var linearAlgebraObject: la_object_t {
         return la_matrix_from_double_buffer(buffer,
@@ -24,19 +24,19 @@ struct Matrix {
                                             la_attribute_t(LA_DEFAULT_ATTRIBUTES))
     }
     
-    init(array: [[Double]]) {
+    public init(array: [[Double]]) {
         self.rows = array.count
         self.cols = array[0].count
         self.buffer = Array(array.joined())
     }
     
-    init(array: [Double], cols: Int = 1) {
+    public init(array: [Double], cols: Int = 1) {
         self.rows = array.count / cols
         self.cols = cols
         self.buffer = array
     }
     
-    init(rows: Int, cols: Int) {
+    public init(rows: Int, cols: Int) {
         self.rows = rows
         self.cols = cols
         let rand = GKGaussianDistribution(randomSource: GKMersenneTwisterRandomSource(),
@@ -44,13 +44,13 @@ struct Matrix {
         self.buffer = [Double](repeating: 0.0, count: rows * cols).map { _ in Double(rand.nextInt()) / 1000.0 }
     }
     
-    init(value: Double, rows: Int, cols: Int) {
+    public init(value: Double, rows: Int, cols: Int) {
         self.rows = rows
         self.cols = cols
         self.buffer = [Double](repeating: value, count: rows * cols)
     }
     
-    init(linearAlgebraObject: la_object_t) {
+    public init(linearAlgebraObject: la_object_t) {
         self.rows = Int(la_matrix_rows(linearAlgebraObject))
         self.cols = Int(la_matrix_cols(linearAlgebraObject))
         var buf = [Double](repeating: 0.0, count: rows * cols)
@@ -58,71 +58,71 @@ struct Matrix {
         self.buffer = buf
     }
     
-    subscript(row: Int, col: Int) -> Double {
+    public subscript(row: Int, col: Int) -> Double {
         return buffer[row * self.cols + col]
     }
     
-    subscript(i: Int) -> Double {
+    public subscript(i: Int) -> Double {
         return self[i, 0]
     }
     
-    func toArray() -> [Double] {
+    public func toArray() -> [Double] {
         return buffer
     }
     
-    func filled(value: Double) -> Matrix {
+    public func filled(value: Double) -> Matrix {
         return Matrix(value: value, rows: rows, cols: cols)
     }
     
-    func transpose() -> Matrix {
+    public func transpose() -> Matrix {
         let la = la_transpose(linearAlgebraObject)
         return Matrix(linearAlgebraObject: la)
     }
     
-    func scale(_ scalar: Double) -> Matrix {
+    public func scale(_ scalar: Double) -> Matrix {
         let la = la_scale_with_double(linearAlgebraObject, scalar)
         return Matrix(linearAlgebraObject: la)
     }
     
-    func add(_ other: Double) -> Matrix {
+    public func add(_ other: Double) -> Matrix {
         let la = la_sum(linearAlgebraObject, filled(value: other).linearAlgebraObject)
         return Matrix(linearAlgebraObject: la)
     }
     
-    func add(_ other: Matrix) -> Matrix {
+    public func add(_ other: Matrix) -> Matrix {
         let la = la_sum(linearAlgebraObject, other.linearAlgebraObject)
         return Matrix(linearAlgebraObject: la)
     }
     
-    func difference(_ other: Double) -> Matrix {
+    public func difference(_ other: Double) -> Matrix {
         let la = la_difference(linearAlgebraObject, filled(value: other).linearAlgebraObject)
         return Matrix(linearAlgebraObject: la)
     }
     
-    func difference(_ other: Matrix) -> Matrix {
+    public func difference(_ other: Matrix) -> Matrix {
         let la = la_difference(linearAlgebraObject, other.linearAlgebraObject)
         return Matrix(linearAlgebraObject: la)
     }
     
     // Hadamard product
-    func multiply(_ other: Matrix) -> Matrix {
+    public func multiply(_ other: Matrix) -> Matrix {
         assert(rows == other.rows && cols == other.cols)
         let la = la_elementwise_product(linearAlgebraObject, other.linearAlgebraObject)
         return Matrix(linearAlgebraObject: la)
     }
     
-    func dot(_ other: Matrix) -> Matrix {
+    public func dot(_ other: Matrix) -> Matrix {
         let new = la_matrix_product(linearAlgebraObject, other.linearAlgebraObject)
         return Matrix(linearAlgebraObject: new)
     }
     
-    func dot(_ other: Vector) -> Vector {
+    public func dot(_ other: Vector) -> Vector {
         return Vector(calculator: dot(other.calculator))
     }
 }
 
 extension Matrix: CustomStringConvertible {
-    var description: String {
+    public var description: String {
         let array = (0..<rows).map { (row: Int) -> [Double] in
             let from = cols * row
             let to = cols * (row + 1)

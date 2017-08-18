@@ -97,11 +97,12 @@ public struct LSTMNetwork {
             let target = Vector(array: targetLists[i])
             let deltaX = output - target
             
-            let l2Loss = sum(deltaX.multiply(deltaX) * 0.5)
+            let loss = target - output
+            let l2Loss = sum(loss.multiply(loss) * 0.5)
             totalLoss += l2Loss
             
             let next = i + 1 > lstms.count - 1 ? LSTM(wf: wf, wi: wi, wo: wo, wa: wa, rf: rf, ri: ri, ro: ro, ra: ra) : lstms[i + 1]
-            let result = lstm.backward(deltaX: deltaX, recurrentOut: state, nextForget: next.forgetGate)
+            let result = lstm.backward(deltaX: deltaX, recurrentOut: state, nextForget: next.forgetGateValue)
             state.0 = result.0
             state.1 = result.1
             state.2 = result.2

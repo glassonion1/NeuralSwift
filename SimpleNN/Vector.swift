@@ -9,76 +9,76 @@
 import Foundation
 import Accelerate
 
-struct Vector {
+public struct Vector: Variable {
     let calculator: Matrix
     
-    var rows: Int {
+    private var buffer: [Double] {
+        return calculator.toArray()
+    }
+    
+    public var rows: Int {
         return calculator.rows
     }
-    var cols: Int {
+    public var cols: Int {
         return calculator.cols
     }
     
-    var buffer: [Double] {
-        return calculator.buffer
-    }
-    
-    init(array: [Double]) {
+    public init(array: [Double]) {
         calculator = Matrix(array: array)
     }
     
-    init(value: Double, rows: Int) {
+    public init(value: Double, rows: Int) {
         calculator = Matrix(value: value, rows: rows, cols: 1)
     }
     
-    init(calculator: Matrix) {
+    public init(calculator: Matrix) {
         self.calculator = calculator
     }
     
-    subscript(i: Int) -> Double {
+    public subscript(i: Int) -> Double {
         return buffer[i]
     }
     
-    func toArray() -> [Double] {
+    public func toArray() -> [Double] {
         return buffer
     }
     
-    func filled(value: Double) -> Vector {
+    public func filled(value: Double) -> Vector {
         return Vector(value: value, rows: rows)
     }
     
-    func transpose() -> Vector {
+    public func transpose() -> Vector {
         return Vector(calculator: calculator.transpose())
     }
     
-    func scale(_ scalar: Double) -> Vector {
+    public func scale(_ scalar: Double) -> Vector {
         return Vector(calculator: calculator.scale(scalar))
     }
     
-    func add(_ other: Double) -> Vector {
+    public func add(_ other: Double) -> Vector {
         return Vector(calculator: calculator.add(other))
     }
     
-    func add(_ other: Vector) -> Vector {
+    public func add(_ other: Vector) -> Vector {
         return Vector(calculator: calculator.add(other.calculator))
     }
     
-    func difference(_ other: Double) -> Vector {
+    public func difference(_ other: Double) -> Vector {
         return Vector(calculator: calculator.difference(other))
     }
     
-    func difference(_ other: Vector) -> Vector {
+    public func difference(_ other: Vector) -> Vector {
         return Vector(calculator: calculator.difference(other.calculator))
     }
     
     // Hadamard product
-    func multiply(_ other: Vector) -> Vector {
+    public func multiply(_ other: Vector) -> Vector {
         let matrix = calculator.multiply(other.calculator)
         return Vector(calculator: matrix)
     }
     
     // Inner product
-    func dot(_ other: Vector) -> Double {
+    public func dot(_ other: Vector) -> Double {
         assert(rows == other.rows && cols == other.cols)
         let la = la_inner_product(calculator.linearAlgebraObject,
                                   other.calculator.linearAlgebraObject)
@@ -86,7 +86,7 @@ struct Vector {
         return matrix[0]
     }
     
-    func outer(_ other: Vector) -> Matrix {
+    public func outer(_ other: Vector) -> Matrix {
         let new = la_outer_product(calculator.linearAlgebraObject, other.calculator.linearAlgebraObject)
         return Matrix(linearAlgebraObject: new)
     }
