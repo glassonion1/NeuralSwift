@@ -31,9 +31,12 @@ public struct LSTMNetwork {
     // output gate
     var ro: Matrix
     
+    var wy: Matrix
+    
     private let learningRate: Double
     
     var lstms = [LSTM]()
+    var softmaxLayer = SoftmaxLayer()
     
     public init(sequenceSize: Int, inputDataLength: Int, outputDataLength: Int, learningRate: Double) {
         self.sequenceSize = sequenceSize
@@ -47,6 +50,8 @@ public struct LSTMNetwork {
         ri = Matrix(rows: outputDataLength, cols: outputDataLength)
         ro = Matrix(rows: outputDataLength, cols: outputDataLength)
         ra = Matrix(rows: outputDataLength, cols: outputDataLength)
+        
+        wy = Matrix(rows: outputDataLength, cols: outputDataLength)
         
         self.learningRate = learningRate
         
@@ -74,7 +79,7 @@ public struct LSTMNetwork {
             state = lstms[i].forward(x: inputs, state: state)
             
             let output = state.0
-            //outputs.append(softmax(output).toArray())
+            //outputs.append(softmaxLayer.forward(x: wy * output).toArray())
             outputs.append(output.toArray())
         }
         
@@ -83,6 +88,8 @@ public struct LSTMNetwork {
     
     public mutating func train(inputLists: [[Double]], targetLists: [[Double]]) -> Double {
         let outputs = query(lists: inputLists)
+        
+        let results = outputs.map { softmaxLayer.forward(x: wy * Vector(array: $0)) }
         
         let dX = Vector(value: 0, rows: wf.rows)
         let dY = Vector(value: 0, rows: wf.rows)
@@ -93,20 +100,32 @@ public struct LSTMNetwork {
         
         for i in (0..<lstms.count).reversed() {
             let lstm = lstms[i]
+            let result = results[i]
             let output = Vector(array: outputs[i])
             let target = Vector(array: targetLists[i])
-            let deltaX = output - target
+            // a target is one hot vector like [0,1,0,0..0]
+            let delta = result - target
+        
+            let deltaX = softmaxLayer.backward(y: result, delta: delta)
             
+            wy = wy - (deltaX * output.transpose()) * learningRate
+            
+            /*
             let loss = target - output
             let l2Loss = sum(loss.multiply(loss) * 0.5)
             totalLoss += l2Loss
+            */
+            
+            let loss = sum(target.multiply(log(result))) * -1
+            totalLoss += loss
+            
             
             let next = i + 1 > lstms.count - 1 ? LSTM(wf: wf, wi: wi, wo: wo, wa: wa, rf: rf, ri: ri, ro: ro, ra: ra) : lstms[i + 1]
-            let result = lstm.backward(deltaX: deltaX, recurrentOut: state, nextForget: next.forgetGateValue)
-            state.0 = result.0
-            state.1 = result.1
-            state.2 = result.2
-            deltas.append(result.3)
+            let backward = lstm.backward(deltaX: deltaX, recurrentOut: state, nextForget: next.forgetGateValue)
+            state.0 = backward.0
+            state.1 = backward.1
+            state.2 = backward.2
+            deltas.append(backward.3)
         }
         deltas = deltas.reversed()
         

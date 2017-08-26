@@ -318,7 +318,7 @@ class SimpleNNTests: XCTestCase {
                     lossData += "\(loss)\n"
                 }
             }
-            print(lossData)
+            //print(lossData)
             
             // test
             let testCsv = try String(contentsOfFile: testPath, encoding: String.Encoding.utf8)
@@ -374,16 +374,16 @@ class SimpleNNTests: XCTestCase {
             }
         }
         
-        //print(lossData)
+        print(lossData)
         
         let test: [[Double]] = toOneHot(values: [0,1,2,3], maxValue: maxValue)
         let results = rnn.query(lists: test)
         
-        let expected = results.map { softmax(Vector(array: $0)) }.map { $0.toArray().index(of: $0.toArray().max()!)! }
-        //let expected = results.map { Vector(array: $0) }.map { $0.toArray().index(of: $0.toArray().max()!)! }
+        //let expected = results.map { softmax(Vector(array: $0)) }.map { $0.toArray().index(of: $0.toArray().max()!)! }
+        let expected = results.map { Vector(array: $0) }.map { $0.toArray().index(of: $0.toArray().max()!)! }
 
         print("----testRnnTrain2----")
-        print(results.map { softmax(Vector(array: $0)) })
+        print(results)
         print(expected)
         
         XCTAssertTrue([1,2,3,0] == expected)

@@ -71,6 +71,15 @@ func *(lhs: Matrix, rhs: Matrix) -> Matrix {
     return lhs.dot(rhs)
 }
 
+func log(_ vector: Vector) -> Vector {
+    let x = vector.toArray()
+    var result = [Double](repeating: 0.0, count: x.count)
+    
+    vvlog(&result, x, [Int32(x.count)])
+    
+    return Vector(array: result)
+}
+
 func sum(_ vector: Vector) -> Double {
     let x = vector.toArray()
     
@@ -81,10 +90,10 @@ func sum(_ vector: Vector) -> Double {
 }
 
 func square(_ vector: Vector) -> Vector {
-    let array = vector.toArray()
-    var results = [Double](repeating: 0.0, count: array.count)
+    let x = vector.toArray()
+    var results = [Double](repeating: 0.0, count: x.count)
     
-    vDSP_vsqD(array, 1, &results, 1, vDSP_Length(array.count))
+    vDSP_vsqD(x, 1, &results, 1, vDSP_Length(x.count))
     
     return Vector(array: results)
 }
