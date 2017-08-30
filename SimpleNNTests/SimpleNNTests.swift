@@ -139,12 +139,12 @@ class SimpleNNTests: XCTestCase {
         let c: Matrix = a * b
         print("¥¥¥¥¥¥¥¥")
         print(c)
-        XCTAssertEqualWithAccuracy(c[0, 0], 60, accuracy: 0.001)
-        XCTAssertEqualWithAccuracy(c[0, 1], 20, accuracy: 0.001)
-        XCTAssertEqualWithAccuracy(c[1, 0], 90, accuracy: 0.001)
-        XCTAssertEqualWithAccuracy(c[1, 1], 30, accuracy: 0.001)
-        XCTAssertEqualWithAccuracy(c[2, 0], 120, accuracy: 0.001)
-        XCTAssertEqualWithAccuracy(c[2, 1], 40, accuracy: 0.001)
+        XCTAssertEqual(c[0, 0], 60, accuracy: 0.001)
+        XCTAssertEqual(c[0, 1], 20, accuracy: 0.001)
+        XCTAssertEqual(c[1, 0], 90, accuracy: 0.001)
+        XCTAssertEqual(c[1, 1], 30, accuracy: 0.001)
+        XCTAssertEqual(c[2, 0], 120, accuracy: 0.001)
+        XCTAssertEqual(c[2, 1], 40, accuracy: 0.001)
     }
     
     func testVectorAdd() {
@@ -158,7 +158,7 @@ class SimpleNNTests: XCTestCase {
     func testVectorSum() {
         let a = Vector(array: [20, 30.3, -9.0, -0.09])
         let result = sum(a)
-        XCTAssertEqualWithAccuracy(result, 41.21, accuracy: 0.01)
+        XCTAssertEqual(result, 41.21, accuracy: 0.01)
     }
     
     func testSoftmax() {
@@ -169,7 +169,7 @@ class SimpleNNTests: XCTestCase {
         print(softmaxed)
         
         let sum = softmaxed.toArray().reduce(0.0, +)
-        XCTAssertEqualWithAccuracy(sum, 1.0, accuracy: 0.000001)
+        XCTAssertEqual(sum, 1.0, accuracy: 0.000001)
     }
     
     func testTanhLayer() {
@@ -177,10 +177,10 @@ class SimpleNNTests: XCTestCase {
         let layer = TanhLayer()
         let result = layer.forward(x: data)
         print(result)
-        XCTAssertEqualWithAccuracy(result[0], -0.76159415595576485, accuracy: 0.000000001)
-        XCTAssertEqualWithAccuracy(result[1], 0.99728296009914208, accuracy: 0.000000001)
-        XCTAssertEqualWithAccuracy(result[2], 0.99990920426259511, accuracy: 0.000000001)
-        XCTAssertEqualWithAccuracy(result[3], 0.19737532022490401, accuracy: 0.000000001)
+        XCTAssertEqual(result[0], -0.76159415595576485, accuracy: 0.000000001)
+        XCTAssertEqual(result[1], 0.99728296009914208, accuracy: 0.000000001)
+        XCTAssertEqual(result[2], 0.99990920426259511, accuracy: 0.000000001)
+        XCTAssertEqual(result[3], 0.19737532022490401, accuracy: 0.000000001)
         
         let target = Vector(array: [-1.0, 3.3, 0.5, 0.2])
         let result2 = layer.backward(y: result, delta: result - target)
@@ -192,10 +192,10 @@ class SimpleNNTests: XCTestCase {
         let data = Vector(array: [-1.0, 3.3, 5.0, 0.2])
         let layer = SigmoidLayer()
         let result = layer.forward(x: data)
-        XCTAssertEqualWithAccuracy(result[0], 0.268941421369995, accuracy: 0.000000001)
-        XCTAssertEqualWithAccuracy(result[1], 0.96442881, accuracy: 0.000000001)
-        XCTAssertEqualWithAccuracy(result[2], 0.99330715, accuracy: 0.000000001)
-        XCTAssertEqualWithAccuracy(result[3], 0.549833997312478, accuracy: 0.000000001)
+        XCTAssertEqual(result[0], 0.268941421369995, accuracy: 0.000000001)
+        XCTAssertEqual(result[1], 0.96442881, accuracy: 0.000000001)
+        XCTAssertEqual(result[2], 0.99330715, accuracy: 0.000000001)
+        XCTAssertEqual(result[3], 0.549833997312478, accuracy: 0.000000001)
         
         let target = Vector(array: [-1.0, 3.3, 0.5, 0.2])
         let result2 = layer.backward(y: result, delta: result - target)
@@ -208,12 +208,12 @@ class SimpleNNTests: XCTestCase {
         let layer = SoftmaxLayer()
         let result = layer.forward(x: data)
         print(result)
-        XCTAssertEqualWithAccuracy(result[0], 0.0020770644753070051, accuracy: 0.000000001)
-        XCTAssertEqualWithAccuracy(result[1], 0.15307922333088542, accuracy: 0.000000001)
-        XCTAssertEqualWithAccuracy(result[2], 0.83794761527972594, accuracy: 0.000000001)
-        XCTAssertEqualWithAccuracy(result[3], 0.0068960969140816957, accuracy: 0.000000001)
+        XCTAssertEqual(result[0], 0.0020770644753070051, accuracy: 0.000000001)
+        XCTAssertEqual(result[1], 0.15307922333088542, accuracy: 0.000000001)
+        XCTAssertEqual(result[2], 0.83794761527972594, accuracy: 0.000000001)
+        XCTAssertEqual(result[3], 0.0068960969140816957, accuracy: 0.000000001)
         let sum = result.toArray().reduce(0.0, +)
-        XCTAssertEqualWithAccuracy(sum, 1.0, accuracy: 0.000001)
+        XCTAssertEqual(sum, 1.0, accuracy: 0.000001)
         
         let target = Vector(array: [-1.0, 3.3, 0.5, 0.2])
         print(result - target)
@@ -233,9 +233,9 @@ class SimpleNNTests: XCTestCase {
         print("+++++++++++")
         print(result2)
         print("+++++++++++")
-        XCTAssertNotEqualWithAccuracy(result[0], result2[0], 0.0001)
-        XCTAssertNotEqualWithAccuracy(result[1], result2[1], 0.0001)
-        XCTAssertNotEqualWithAccuracy(result[2], result2[2], 0.0001)
+        XCTAssertNotEqual(result[0], result2[0], accuracy: 0.0001)
+        XCTAssertNotEqual(result[1], result2[1], accuracy: 0.0001)
+        XCTAssertNotEqual(result[2], result2[2], accuracy: 0.0001)
     }
     
     func testForward() {
@@ -243,9 +243,9 @@ class SimpleNNTests: XCTestCase {
         let inputs = Vector(array: [0.9, 0.1, 0.8])
         let layer = SigmoidLayer()
         let outputs = layer.forward(x: weight * inputs)
-        XCTAssertEqualWithAccuracy(outputs[0], 0.761, accuracy: 0.001)
-        XCTAssertEqualWithAccuracy(outputs[1], 0.603, accuracy: 0.001)
-        XCTAssertEqualWithAccuracy(outputs[2], 0.650, accuracy: 0.001)
+        XCTAssertEqual(outputs[0], 0.761, accuracy: 0.001)
+        XCTAssertEqual(outputs[1], 0.603, accuracy: 0.001)
+        XCTAssertEqual(outputs[2], 0.650, accuracy: 0.001)
     }
     
     func testQuery() {
@@ -254,9 +254,9 @@ class SimpleNNTests: XCTestCase {
         nn.w2 = Matrix(array: [[0.3, 0.7, 0.5], [0.6, 0.5, 0.2], [0.8, 0.1, 0.9]])
         let outputs = nn.query(list: [0.9, 0.1, 0.8])
         print(outputs)
-        XCTAssertEqualWithAccuracy(outputs[0], 0.726, accuracy: 0.001)
-        XCTAssertEqualWithAccuracy(outputs[1], 0.708, accuracy: 0.001)
-        XCTAssertEqualWithAccuracy(outputs[2], 0.778, accuracy: 0.001)
+        XCTAssertEqual(outputs[0], 0.726, accuracy: 0.001)
+        XCTAssertEqual(outputs[1], 0.708, accuracy: 0.001)
+        XCTAssertEqual(outputs[2], 0.778, accuracy: 0.001)
     }
     
     func testBackpropagation() {
@@ -266,7 +266,7 @@ class SimpleNNTests: XCTestCase {
         let layer = SigmoidLayer()
         let results = layer.backward(y: outputs, delta: errors) * inputs.transpose()
         print(results)
-        XCTAssertEqualWithAccuracy(results[0, 0], 0.02650, accuracy: 0.00001)
+        XCTAssertEqual(results[0, 0], 0.02650, accuracy: 0.00001)
     }
     
     func testTrain() {
@@ -353,13 +353,14 @@ class SimpleNNTests: XCTestCase {
         }
     }
     
-    func testLstmTrain() {
+    func _testLstmTrain() {
         
         // [1,1,2,3,1] [2,1,2,3,2] [3,1,2,3,3] [4,1,2,3,4] [5,1,2,3,5]
         let maxValue = 5
         
         let dataList: [[[Double]]] = [[0,1,2,3], [1,1,2,3], [2,1,2,3], [3,1,2,3], [4,1,2,3], [5,1,2,3]].map { toOneHot(values: $0, maxValue: maxValue) }
-        let targetDataList: [[[Double]]] = [[1,2,3,0], [1,2,3,1], [1,2,3,2], [1,2,3,3], [1,2,3,4], [1,2,3,5]].map { toOneHot(values: $0, maxValue: maxValue) }
+        let targetData = [[1,2,3,0], [1,2,3,1], [1,2,3,2], [1,2,3,3], [1,2,3,4], [1,2,3,5]]
+        let targetDataList: [[[Double]]] = targetData.map { toOneHot(values: $0, maxValue: maxValue) }
         var rnn = LSTMNetwork(sequenceSize: 4, inputDataLength: maxValue + 1, outputDataLength: maxValue + 1, learningRate: 0.1)
         
         
@@ -376,16 +377,66 @@ class SimpleNNTests: XCTestCase {
         
         print(lossData)
         
-        let test: [[Double]] = toOneHot(values: [0,1,2,3], maxValue: maxValue)
-        let results = rnn.query(lists: test)
+        for i in 0..<dataList.count {
+            let data = dataList[i]
+            let results = rnn.query(lists: data)
+            let expected = results.map { $0.index(of: $0.max()!)! }
+            print(expected)
+            XCTAssertTrue(targetData[i] == expected)
+        }
+    }
+    
+    func testLstmTrain2() {
         
-        //let expected = results.map { softmax(Vector(array: $0)) }.map { $0.toArray().index(of: $0.toArray().max()!)! }
-        let expected = results.map { Vector(array: $0) }.map { $0.toArray().index(of: $0.toArray().max()!)! }
+        let length = 501
+        var samples = [Double]()
+        var str = ""
+        for n in 0..<length {
+            // sin curve on 0 ot 1
+            let data = sin(Double.pi / 180 * Double(n)) * 0.5 + 0.5
+            samples.append(data)
+            str += "\(data)\n"
+        }
 
-        print("----testRnnTrain2----")
-        print(results)
-        print(expected)
+        //print(str)
         
-        XCTAssertTrue([1,2,3,0] == expected)
+        let sequenceSize = 1
+        
+        let t0 = Array(samples.dropLast())
+        let t1 = Array(samples.dropFirst())
+        var data = [[[Double]]]()
+        
+        for i in 0..<t0.count {
+            data.append([[t0[i]], [t1[i]]])
+        }
+        
+        let dataList = Array(data.dropLast())
+        let targetDataList = Array(data.dropFirst())
+        
+        var rnn = LSTMNetwork(sequenceSize: sequenceSize * 2,
+                              inputDataLength: sequenceSize,
+                              outputDataLength: sequenceSize,
+                              learningRate: 0.1)
+        let epoch = 1000
+        var lossData = ""
+        for _ in 0..<epoch {
+            for i in 0..<dataList.count {
+                let data = dataList[i]
+                let targetData = targetDataList[i]
+                let loss = rnn.train(inputLists: data, targetLists: targetData)
+                lossData += "\(loss)\n"
+            }
+        }
+        
+        //print(lossData)
+        print("%%%%%%%%%%%%%%%%%")
+        
+        var str2 = ""
+        for i in 0..<dataList.count {
+            let data = dataList[i]
+            let results = rnn.query(lists: data)
+            str2 += "\(results[1][0])\n"
+        }
+        print(str2)
     }
 }

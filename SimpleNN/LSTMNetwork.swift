@@ -89,8 +89,6 @@ public struct LSTMNetwork {
     public mutating func train(inputLists: [[Double]], targetLists: [[Double]]) -> Double {
         let outputs = query(lists: inputLists)
         
-        let results = outputs.map { softmaxLayer.forward(x: wy * Vector(array: $0)) }
-        
         let dX = Vector(value: 0, rows: wf.rows)
         let dY = Vector(value: 0, rows: wf.rows)
         let dCell = Vector(value: 0, rows: wf.rows)
@@ -100,25 +98,20 @@ public struct LSTMNetwork {
         
         for i in (0..<lstms.count).reversed() {
             let lstm = lstms[i]
-            let result = results[i]
             let output = Vector(array: outputs[i])
             let target = Vector(array: targetLists[i])
             // a target is one hot vector like [0,1,0,0..0]
-            let delta = result - target
-        
-            let deltaX = softmaxLayer.backward(y: result, delta: delta)
+            let deltaX = output - target
             
-            wy = wy - (deltaX * output.transpose()) * learningRate
-            
-            /*
             let loss = target - output
             let l2Loss = sum(loss.multiply(loss) * 0.5)
             totalLoss += l2Loss
-            */
             
-            let loss = sum(target.multiply(log(result))) * -1
+            
+            /*
+            let loss = sum(target.multiply(log(output))) * -1
             totalLoss += loss
-            
+            */
             
             let next = i + 1 > lstms.count - 1 ? LSTM(wf: wf, wi: wi, wo: wo, wa: wa, rf: rf, ri: ri, ro: ro, ra: ra) : lstms[i + 1]
             let backward = lstm.backward(deltaX: deltaX, recurrentOut: state, nextForget: next.forgetGateValue)
