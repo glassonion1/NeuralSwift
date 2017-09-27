@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
   #
 
   s.name         = "NeuralSwift"
-  s.version      = "0.1.0"
+  s.version      = "0.0.1"
   s.summary      = "The simplest neural network library on Swift."
 
   # This description is used to generate tags and improve search results.
@@ -63,7 +63,7 @@ Pod::Spec.new do |s|
   #  the deployment target. You can optionally include the target after the platform.
   #
 
-  s.platform     = :ios, "9.0"
+  s.platform     = :ios, "10.0"
   s.requires_arc = true
   
   # s.platform     = :ios
