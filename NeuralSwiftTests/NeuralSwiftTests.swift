@@ -9,7 +9,7 @@
 import XCTest
 import Accelerate
 import GameplayKit
-@testable import SimpleNN
+@testable import NeuralSwift
 
 
 extension Array {
@@ -20,7 +20,7 @@ extension Array {
     }
 }
 
-class SimpleNNTests: XCTestCase {
+class NeuralSwiftTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
@@ -286,11 +286,11 @@ class SimpleNNTests: XCTestCase {
     }
     
     func testMnist() {
-        guard let trainingPath = Bundle(for: SimpleNNTests.self).path(forResource: "mnist_train_100", ofType: "csv") else {
+        guard let trainingPath = Bundle(for: NeuralSwiftTests.self).path(forResource: "mnist_train_100", ofType: "csv") else {
             assertionFailure()
             return
         }
-        guard let testPath = Bundle(for: SimpleNNTests.self).path(forResource: "mnist_test_10", ofType: "csv") else {
+        guard let testPath = Bundle(for: NeuralSwiftTests.self).path(forResource: "mnist_test_10", ofType: "csv") else {
             assertionFailure()
             return
         }

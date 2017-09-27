@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import SimpleNN
+import NeuralSwift
 
 class ViewController: UIViewController {
 

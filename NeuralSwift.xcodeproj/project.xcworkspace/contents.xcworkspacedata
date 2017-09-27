@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:SimpleNN.xcodeproj">
+      location = "self:/Users/taisukefujita/Dropbox/SimpleNN/NeuralSwift.xcodeproj">
    </FileRef>
 </Workspace>
