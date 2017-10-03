@@ -9,15 +9,15 @@
          <BuildActionEntry
             buildForTesting = "YES"
             buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "6E93090A1F1F18EB00670D68"
-               BuildableName = "SimpleNN.framework"
-               BlueprintName = "SimpleNN"
-               ReferencedContainer = "container:SimpleNN.xcodeproj">
+               BlueprintIdentifier = "6E9309131F1F18EC00670D68"
+               BuildableName = "NeuralSwiftTests.xctest"
+               BlueprintName = "NeuralSwiftTests"
+               ReferencedContainer = "container:NeuralSwift.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -34,21 +34,12 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "6E9309131F1F18EC00670D68"
-               BuildableName = "SimpleNNTests.xctest"
-               BlueprintName = "SimpleNNTests"
-               ReferencedContainer = "container:SimpleNN.xcodeproj">
+               BuildableName = "NeuralSwiftTests.xctest"
+               BlueprintName = "NeuralSwiftTests"
+               ReferencedContainer = "container:NeuralSwift.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "6E93090A1F1F18EB00670D68"
-            BuildableName = "SimpleNN.framework"
-            BlueprintName = "SimpleNN"
-            ReferencedContainer = "container:SimpleNN.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
       <AdditionalOptions>
       </AdditionalOptions>
    </TestAction>
@@ -66,10 +57,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "6E93090A1F1F18EB00670D68"
-            BuildableName = "SimpleNN.framework"
-            BlueprintName = "SimpleNN"
-            ReferencedContainer = "container:SimpleNN.xcodeproj">
+            BlueprintIdentifier = "6E9309131F1F18EC00670D68"
+            BuildableName = "NeuralSwiftTests.xctest"
+            BlueprintName = "NeuralSwiftTests"
+            ReferencedContainer = "container:NeuralSwift.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -84,10 +75,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "6E93090A1F1F18EB00670D68"
-            BuildableName = "SimpleNN.framework"
-            BlueprintName = "SimpleNN"
-            ReferencedContainer = "container:SimpleNN.xcodeproj">
+            BlueprintIdentifier = "6E9309131F1F18EC00670D68"
+            BuildableName = "NeuralSwiftTests.xctest"
+            BlueprintName = "NeuralSwiftTests"
+            ReferencedContainer = "container:NeuralSwift.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>
