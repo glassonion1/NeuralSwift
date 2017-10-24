@@ -11,7 +11,6 @@ import Accelerate
 import GameplayKit
 @testable import NeuralSwift
 
-
 extension Array {
     func chunks(_ chunkSize: Int) -> [[Element]] {
         return stride(from: 0, to: self.count, by: chunkSize).map {
@@ -351,100 +350,5 @@ class NeuralSwiftTests: XCTestCase {
         } catch {
             XCTAssert(false)
         }
-    }
-    
-    func _testLstmTrain() {
-        
-        // [1,1,2,3,1] [2,1,2,3,2] [3,1,2,3,3] [4,1,2,3,4] [5,1,2,3,5]
-        let maxValue = 5
-        
-        let dataList: [[[Double]]] = [[0,1,2,3], [1,1,2,3], [2,1,2,3], [3,1,2,3], [4,1,2,3], [5,1,2,3]].map { toOneHot(values: $0, maxValue: maxValue) }
-        let targetData = [[1,2,3,0], [1,2,3,1], [1,2,3,2], [1,2,3,3], [1,2,3,4], [1,2,3,5]]
-        let targetDataList: [[[Double]]] = targetData.map { toOneHot(values: $0, maxValue: maxValue) }
-        var rnn = LSTMNetwork(sequenceSize: 4, inputDataLength: maxValue + 1, outputDataLength: maxValue + 1, learningRate: 0.1)
-        
-        
-        let epoch = 1000
-        var lossData = ""
-        for _ in 0..<epoch {
-            for i in 0..<dataList.count {
-                let data = dataList[i]
-                let targetData = targetDataList[i]
-                let loss = rnn.train(inputLists: data, targetLists: targetData)
-                lossData += "\(loss)\n"
-            }
-        }
-        
-        print(lossData)
-        
-        for i in 0..<dataList.count {
-            let data = dataList[i]
-            let results = rnn.query(lists: data)
-            let expected = results.map { $0.index(of: $0.max()!)! }
-            print(expected)
-            XCTAssertTrue(targetData[i] == expected)
-        }
-    }
-    
-    func testLstmTrain2() {
-        
-        let length = 500
-        var samples = [Double]()
-        var str = ""
-        for n in 0..<length {
-            // sin curve on 0 ot 1
-            let data = sin(Double.pi / 180 * Double(n)) * 0.5 + 0.5
-            samples.append(data)
-            str += "\(data)\n"
-        }
-
-        //print(str)
-        
-        let sequenceSize = 8
-        let dataSize = 1
-        
-        let t0 = Array(samples.dropLast(sequenceSize - 1))
-        let t1 = Array(samples.dropFirst())
-        let t2 = Array(samples.dropFirst(2))
-        let t3 = Array(samples.dropFirst(3))
-        let t4 = Array(samples.dropFirst(4))
-        let t5 = Array(samples.dropFirst(5))
-        let t6 = Array(samples.dropFirst(6))
-        let t7 = Array(samples.dropFirst(sequenceSize - 1))
-        var data = [[[Double]]]()
-        
-        for i in 0..<t0.count {
-            data.append([[t0[i]], [t1[i]], [t2[i]], [t3[i]], [t4[i]], [t5[i]], [t6[i]], [t7[i]]])
-        }
-        
-        let dataList = Array(data.dropLast())
-        let targetDataList = Array(data.dropFirst())
-        
-        var rnn = LSTMNetwork(sequenceSize: sequenceSize,
-                              inputDataLength: dataSize,
-                              outputDataLength: dataSize,
-                              learningRate: 0.03)
-        let epoch = 100
-        var lossData = ""
-        for e in 0..<epoch {
-            for i in 0..<dataList.count {
-                let data = dataList[i]
-                let targetData = targetDataList[i]
-                let loss = rnn.train(inputLists: data, targetLists: targetData)
-                lossData += "\(loss)\n"
-            }
-            print("Epoch:\(e)")
-        }
-        
-        //print(lossData)
-        print("%%%%%%%%%%%%%%%%%")
-        
-        var str2 = ""
-        for i in 0..<(length - sequenceSize) {
-            let test = dataList[i]
-            let results = rnn.query(lists: test)
-            str2 += "\(results[sequenceSize - 1][0])\n"
-        }
-        print(str2)
     }
 }

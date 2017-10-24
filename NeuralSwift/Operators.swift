@@ -8,6 +8,10 @@
 
 import Accelerate
 
+func +(lhs: Vector, rhs: Double) -> Vector {
+    return lhs.add(rhs)
+}
+
 func +(lhs: Vector, rhs: Vector) -> Vector {
     return lhs.add(rhs)
 }

@@ -74,24 +74,24 @@ public struct LSTM {
         assert(state.0.rows == wf.rows)
         assert(state.0.rows == rf.cols)
         
-        let h = state.0
+        let prevY = state.0
         prevCell = state.1
         
-        inputActivationValue = inputActivation.forward(x: wa.dot(x) + ra.dot(h))
-        inputGateValue = inputGate.forward(x: wi.dot(x) + ri.dot(h))
-        forgetGateValue = forgetGate.forward(x: wf.dot(x) + rf.dot(h))
-        outputGateValue = outputGate.forward(x: wo.dot(x) + ro.dot(h))
+        inputActivationValue = inputActivation.forward(x: wa.dot(x) + ra.dot(prevY) + 0.2)
+        inputGateValue = inputGate.forward(x: wi.dot(x) + ri.dot(prevY) + 0.65)
+        forgetGateValue = forgetGate.forward(x: wf.dot(x) + rf.dot(prevY) + 0.15)
+        outputGateValue = outputGate.forward(x: wo.dot(x) + ro.dot(prevY) + 0.1)
         
         let newCell = inputGateValue.multiply(inputActivationValue) + prevCell.multiply(forgetGateValue)
-        let newH = cellActivation.forward(x: newCell).multiply(outputGateValue)
+        let y = cellActivation.forward(x: newCell).multiply(outputGateValue)
         
         self.cell = newCell
-        return (newH, newCell)
+        return (y, newCell)
     }
     
-    func backward(deltaX: Vector, recurrentOut: (Vector, Vector, Vector), nextForget: Vector) -> (Vector, Vector, Vector, [String: Vector]) {
-        let recurrentDeltaY = recurrentOut.1
-        let recurrentDeltaCell = recurrentOut.2
+    func backward(deltaX: Vector, recurrentOut: (Vector, Vector), nextForget: Vector) -> (Vector, Vector, [String: Vector]) {
+        let recurrentDeltaY = recurrentOut.0
+        let recurrentDeltaCell = recurrentOut.1
         
         let delta = deltaX + recurrentDeltaY
         let dCell = cellActivation.backward(y: tanh(cell), delta: delta.multiply(outputGateValue))
@@ -102,12 +102,14 @@ public struct LSTM {
         let dForgetGate = forgetGate.backward(y: forgetGateValue, delta: dCell.multiply(prevCell))
         let dOutputGate = outputGate.backward(y: outputGateValue, delta: delta.multiply(tanh(cell)))
         
+        /* for debugging
         let dWInputActivation = wa.transpose() * dInputActivation
         let dWInputGate = wi.transpose() * dInputGate
         let dWForgetGate  = wf.transpose() * dForgetGate
         let dWOutputGate  = wo.transpose() * dOutputGate
         
         let dX = dWInputActivation + dWInputGate + dWForgetGate + dWOutputGate
+        */
         
         let dRInputActivation = ra.transpose() * dInputActivation
         let dRInputGate = ri.transpose() * dInputGate
@@ -121,6 +123,6 @@ public struct LSTM {
                           "deltaF": dForgetGate,
                           "deltaO": dOutputGate]
         
-        return (dX, dY, dCell, dictionary)
+        return (dY, dCell, dictionary)
     }
 }

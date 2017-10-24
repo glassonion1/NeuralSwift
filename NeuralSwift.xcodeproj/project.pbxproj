@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		6E9309151F1F18EC00670D68 /* NeuralSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E93090B1F1F18EB00670D68 /* NeuralSwift.framework */; };
+		DA2B7E9E1F98895300B29920 /* LSTMTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2B7E9D1F98895300B29920 /* LSTMTests.swift */; };
 		DAFD15B81F7A361B0018169E /* Layer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFD15AB1F7A361B0018169E /* Layer.swift */; };
 		DAFD15B91F7A361B0018169E /* LSTM.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFD15AC1F7A361B0018169E /* LSTM.swift */; };
 		DAFD15BA1F7A361B0018169E /* LSTMNetwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFD15AD1F7A361B0018169E /* LSTMNetwork.swift */; };
@@ -38,6 +39,7 @@
 /* Begin PBXFileReference section */
 		6E93090B1F1F18EB00670D68 /* NeuralSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = NeuralSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6E9309141F1F18EC00670D68 /* NeuralSwiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NeuralSwiftTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA2B7E9D1F98895300B29920 /* LSTMTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LSTMTests.swift; sourceTree = "<group>"; };
 		DAFD15AA1F7A361B0018169E /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DAFD15AB1F7A361B0018169E /* Layer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Layer.swift; sourceTree = "<group>"; };
 		DAFD15AC1F7A361B0018169E /* LSTM.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LSTM.swift; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 				DAFD15C61F7A36230018169E /* mnist_test_10.csv */,
 				DAFD15C71F7A36230018169E /* mnist_train_100.csv */,
 				DAFD15C81F7A36230018169E /* NeuralSwiftTests.swift */,
+				DA2B7E9D1F98895300B29920 /* LSTMTests.swift */,
 			);
 			path = NeuralSwiftTests;
 			sourceTree = "<group>";
@@ -259,6 +262,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DAFD15D11F7A37E80018169E /* NeuralSwiftTests.swift in Sources */,
+				DA2B7E9E1F98895300B29920 /* LSTMTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

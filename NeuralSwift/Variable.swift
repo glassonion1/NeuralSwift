@@ -8,7 +8,7 @@
 
 import Foundation
 
-public protocol Variable {
+public protocol Variable: Codable {
     
     func filled(value: Double) -> Self
     

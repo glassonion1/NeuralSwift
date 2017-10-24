@@ -8,6 +8,14 @@
 
 import Foundation
 
+extension Array {
+    func chunks(_ chunkSize: Int) -> [[Element]] {
+        return stride(from: 0, to: self.count, by: chunkSize).map {
+            Array(self[$0..<Swift.min($0 + chunkSize, self.count)])
+        }
+    }
+}
+
 // @see https://medium.com/@aidangomez/let-s-do-this-f9b699de31d9
 public struct LSTMNetwork {
 
@@ -89,10 +97,9 @@ public struct LSTMNetwork {
     public mutating func train(inputLists: [[Double]], targetLists: [[Double]]) -> Double {
         let outputs = query(lists: inputLists)
         
-        let dX = Vector(value: 0, rows: wf.rows)
         let dY = Vector(value: 0, rows: wf.rows)
         let dCell = Vector(value: 0, rows: wf.rows)
-        var state = (dX, dY, dCell)
+        var state = (dY, dCell)
         var deltas = [[String: Vector]]()
         var totalLoss = 0.0
         
@@ -117,8 +124,7 @@ public struct LSTMNetwork {
             let backward = lstm.backward(deltaX: deltaX, recurrentOut: state, nextForget: next.forgetGateValue)
             state.0 = backward.0
             state.1 = backward.1
-            state.2 = backward.2
-            deltas.append(backward.3)
+            deltas.append(backward.2)
         }
         deltas = deltas.reversed()
         
@@ -163,5 +169,96 @@ public struct LSTMNetwork {
         reset()
         
         return totalLoss / Double(outputs.count)
+    }
+    
+    public mutating func train2(inputLists: [[Double]], targetLists: [[Double]]) -> Double {
+        
+        let xList = inputLists.chunks(sequenceSize)
+        var tList = targetLists.chunks(sequenceSize)
+        assert(xList.count == tList.count)
+        
+        var totalLoss = 0.0
+        
+        for x in xList {
+            var deltas = [[String: Vector]]()
+            let y = query(lists: x)
+            let t = tList.remove(at: 0)
+            
+            let dY = Vector(value: 0, rows: wf.rows)
+            let dCell = Vector(value: 0, rows: wf.rows)
+            var state = (dY, dCell)
+            
+            var sequenceLoss = 0.0
+            
+            for i in (0..<lstms.count).reversed() {
+                // 端数対応
+                if y.count <= i {
+                    continue
+                }
+                let lstm = lstms[i]
+                let output = Vector(array: y[i])
+                let target = Vector(array: t[i])
+                // a target is one hot vector like [0,1,0,0..0]
+                let deltaX = output - target
+                
+                let loss = target - output
+                let l2Loss = sum(loss.multiply(loss) * 0.5)
+                sequenceLoss += l2Loss
+                
+                /*
+                 let loss = sum(target.multiply(log(output))) * -1
+                 totalLoss += loss
+                 */
+                
+                let next = i + 1 == lstms.count ? LSTM(wf: wf, wi: wi, wo: wo, wa: wa, rf: rf, ri: ri, ro: ro, ra: ra) : lstms[i + 1]
+                let backward = lstm.backward(deltaX: deltaX, recurrentOut: state, nextForget: next.forgetGateValue)
+                state.0 = backward.0
+                state.1 = backward.1
+                deltas.insert(backward.2, at: 0)
+            }
+            totalLoss += sequenceLoss / Double(y.count)
+            
+            var dWa = Matrix(value: 0, rows: wa.rows, cols: wa.cols)
+            var dWi = Matrix(value: 0, rows: wi.rows, cols: wi.cols)
+            var dWf = Matrix(value: 0, rows: wf.rows, cols: wf.cols)
+            var dWo = Matrix(value: 0, rows: wo.rows, cols: wo.cols)
+            for i in 0..<x.count {
+                let delta = deltas[i]
+                let xT = Vector(array: inputLists[i]).transpose()
+                
+                dWa = dWa + delta["deltaA"]!.outer(xT)
+                dWi = dWi + delta["deltaI"]!.outer(xT)
+                dWf = dWf + delta["deltaF"]!.outer(xT)
+                dWo = dWo + delta["deltaO"]!.outer(xT)
+            }
+            wa = wa - learningRate * dWa
+            wi = wi - learningRate * dWi
+            wf = wf - learningRate * dWf
+            wo = wo - learningRate * dWo
+            
+            var dRa = Matrix(value: 0, rows: ra.rows, cols: ra.cols)
+            var dRi = Matrix(value: 0, rows: ri.rows, cols: ri.cols)
+            var dRf = Matrix(value: 0, rows: rf.rows, cols: rf.cols)
+            var dRo = Matrix(value: 0, rows: ro.rows, cols: ro.cols)
+            
+            for i in 0..<y.count - 1 {
+                let delta = deltas[i + 1]
+                let yT = Vector(array: y[i]).transpose()
+                
+                dRa = dRa + delta["deltaA"]!.outer(yT)
+                dRi = dRi + delta["deltaI"]!.outer(yT)
+                dRf = dRf + delta["deltaF"]!.outer(yT)
+                dRo = dRo + delta["deltaO"]!.outer(yT)
+            }
+            
+            ra = ra - learningRate * dRa
+            ri = ri - learningRate * dRi
+            rf = rf - learningRate * dRf
+            ro = ro - learningRate * dRo
+        }
+        
+        reset()
+        
+        return totalLoss / Double(xList.count)
     }
 }
