@@ -39,15 +39,22 @@ public struct LSTMNetwork {
     // output gate
     var ro: Matrix
     
-    var wy: Matrix
+    // bias for forget gate
+    var bf: Vector
+    // bias for input gate
+    var bi: Vector
+    // bias for output gate
+    var bo: Vector
+    // bias for input activation
+    var ba: Vector
     
     private let learningRate: Double
     
     var lstms = [LSTM]()
-    var softmaxLayer = SoftmaxLayer()
     
     public init(sequenceSize: Int, inputDataLength: Int, outputDataLength: Int, learningRate: Double) {
         self.sequenceSize = sequenceSize
+        self.learningRate = learningRate
         
         wf = Matrix(rows: outputDataLength, cols: inputDataLength)
         wi = Matrix(rows: outputDataLength, cols: inputDataLength)
@@ -59,9 +66,10 @@ public struct LSTMNetwork {
         ro = Matrix(rows: outputDataLength, cols: outputDataLength)
         ra = Matrix(rows: outputDataLength, cols: outputDataLength)
         
-        wy = Matrix(rows: outputDataLength, cols: outputDataLength)
-        
-        self.learningRate = learningRate
+        bf = Vector(value: 1.0, rows: rf.rows)
+        bi = Vector(value: 0.0, rows: ri.rows)
+        bo = Vector(value: 0.0, rows: ro.rows)
+        ba = Vector(value: 0.0, rows: ra.rows)
         
         reset()
     }
@@ -69,7 +77,9 @@ public struct LSTMNetwork {
     mutating func reset() {
         var lstmList = [LSTM]()
         for _ in 0..<sequenceSize {
-            lstmList.append(LSTM(wf: wf, wi: wi, wo: wo, wa: wa, rf: rf, ri: ri, ro: ro, ra: ra))
+            lstmList.append(LSTM(wf: wf, wi: wi, wo: wo, wa: wa,
+                                 rf: rf, ri: ri, ro: ro, ra: ra,
+                                 bf: bf, bi: bi, bo: bo, ba: ba))
         }
         self.lstms = lstmList
     }
@@ -128,19 +138,35 @@ public struct LSTMNetwork {
         }
         deltas = deltas.reversed()
         
+        var dBa = Vector(value: 0, rows: ra.rows)
+        var dBi = Vector(value: 0, rows: ri.rows)
+        var dBf = Vector(value: 0, rows: rf.rows)
+        var dBo = Vector(value: 0, rows: ro.rows)
+        
         var dWa = Matrix(value: 0, rows: wa.rows, cols: wa.cols)
         var dWi = Matrix(value: 0, rows: wi.rows, cols: wi.cols)
         var dWf = Matrix(value: 0, rows: wf.rows, cols: wf.cols)
         var dWo = Matrix(value: 0, rows: wo.rows, cols: wo.cols)
+        
         for i in 0..<inputLists.count {
             let delta = deltas[i]
             let xT = Vector(array: inputLists[i]).transpose()
+            
+            dBa = dBa + delta["deltaA"]!
+            dBi = dBi + delta["deltaI"]!
+            dBf = dBf + delta["deltaF"]!
+            dBo = dBo + delta["deltaO"]!
             
             dWa = dWa + delta["deltaA"]!.outer(xT)
             dWi = dWi + delta["deltaI"]!.outer(xT)
             dWf = dWf + delta["deltaF"]!.outer(xT)
             dWo = dWo + delta["deltaO"]!.outer(xT)
         }
+        ba = ba - learningRate * dBa
+        bi = bi - learningRate * dBi
+        bf = bf - learningRate * dBf
+        bo = bo - learningRate * dBo
+        
         wa = wa - learningRate * dWa
         wi = wi - learningRate * dWi
         wf = wf - learningRate * dWf
@@ -150,7 +176,7 @@ public struct LSTMNetwork {
         var dRi = Matrix(value: 0, rows: ri.rows, cols: ri.cols)
         var dRf = Matrix(value: 0, rows: rf.rows, cols: rf.cols)
         var dRo = Matrix(value: 0, rows: ro.rows, cols: ro.cols)
-
+        
         for i in 0..<outputs.count - 1 {
             let delta = deltas[i + 1]
             let yT = Vector(array: outputs[i]).transpose()
@@ -218,19 +244,35 @@ public struct LSTMNetwork {
             }
             totalLoss += sequenceLoss / Double(y.count)
             
+            var dBa = Vector(value: 0, rows: ra.rows)
+            var dBi = Vector(value: 0, rows: ri.rows)
+            var dBf = Vector(value: 0, rows: rf.rows)
+            var dBo = Vector(value: 0, rows: ro.rows)
+            
             var dWa = Matrix(value: 0, rows: wa.rows, cols: wa.cols)
             var dWi = Matrix(value: 0, rows: wi.rows, cols: wi.cols)
             var dWf = Matrix(value: 0, rows: wf.rows, cols: wf.cols)
             var dWo = Matrix(value: 0, rows: wo.rows, cols: wo.cols)
             for i in 0..<x.count {
                 let delta = deltas[i]
-                let xT = Vector(array: inputLists[i]).transpose()
+                
+                dBa = dBa + delta["deltaA"]!
+                dBi = dBi + delta["deltaI"]!
+                dBf = dBf + delta["deltaF"]!
+                dBo = dBo + delta["deltaO"]!
+                
+                let xT = Vector(array: x[i]).transpose()
                 
                 dWa = dWa + delta["deltaA"]!.outer(xT)
                 dWi = dWi + delta["deltaI"]!.outer(xT)
                 dWf = dWf + delta["deltaF"]!.outer(xT)
                 dWo = dWo + delta["deltaO"]!.outer(xT)
             }
+            ba = ba - learningRate * dBa
+            bi = bi - learningRate * dBi
+            bf = bf - learningRate * dBf
+            bo = bo - learningRate * dBo
+            
             wa = wa - learningRate * dWa
             wi = wi - learningRate * dWi
             wf = wf - learningRate * dWf

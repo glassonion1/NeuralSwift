@@ -42,7 +42,17 @@ public struct LSTM {
     // recurrent weight for input activation
     var ra: Matrix
     
-    init(wf: Matrix, wi: Matrix, wo: Matrix, wa: Matrix, rf: Matrix, ri: Matrix, ro: Matrix, ra: Matrix) {
+    // bias for forget gate
+    var bf: Vector
+    // bias for input gate
+    var bi: Vector
+    // bias for output gate
+    var bo: Vector
+    // bias for input activation
+    var ba: Vector
+    
+    init(wf: Matrix, wi: Matrix, wo: Matrix, wa: Matrix, rf: Matrix, ri: Matrix, ro: Matrix, ra: Matrix,
+         bf: Vector, bi: Vector, bo: Vector, ba: Vector) {
         self.wf = wf
         self.wi = wi
         self.wo = wo
@@ -52,6 +62,11 @@ public struct LSTM {
         self.ri = ri
         self.ro = ro
         self.ra = ra
+        
+        self.bf = bf
+        self.bi = bi
+        self.bo = bo
+        self.ba = ba
         
         forgetGate = SigmoidLayer()
         inputGate = SigmoidLayer()
@@ -68,6 +83,14 @@ public struct LSTM {
         cell = Vector(value: 0.0, rows: rf.cols)
     }
     
+    init(wf: Matrix, wi: Matrix, wo: Matrix, wa: Matrix, rf: Matrix, ri: Matrix, ro: Matrix, ra: Matrix) {
+        let bf = Vector(value: 1.0, rows: rf.rows)
+        let bi = Vector(value: 0.0, rows: ri.rows)
+        let bo = Vector(value: 0.0, rows: ro.rows)
+        let ba = Vector(value: 0.0, rows: ra.rows)
+        self.init(wf: wf, wi: wi, wo: wo, wa: wa, rf: rf, ri: ri, ro: ro, ra: ra, bf: bf, bi: bi, bo: bo, ba: ba)
+    }
+    
     mutating func forward(x: Vector, state: (Vector, Vector)) -> (Vector, Vector) {
         
         assert(x.rows == wf.cols)
@@ -77,10 +100,10 @@ public struct LSTM {
         let prevY = state.0
         prevCell = state.1
         
-        inputActivationValue = inputActivation.forward(x: wa.dot(x) + ra.dot(prevY) + 0.2)
-        inputGateValue = inputGate.forward(x: wi.dot(x) + ri.dot(prevY) + 0.65)
-        forgetGateValue = forgetGate.forward(x: wf.dot(x) + rf.dot(prevY) + 0.15)
-        outputGateValue = outputGate.forward(x: wo.dot(x) + ro.dot(prevY) + 0.1)
+        inputActivationValue = inputActivation.forward(x: wa.dot(x) + ra.dot(prevY) + ba)
+        inputGateValue = inputGate.forward(x: wi.dot(x) + ri.dot(prevY) + bi)
+        forgetGateValue = forgetGate.forward(x: wf.dot(x) + rf.dot(prevY) + bf)
+        outputGateValue = outputGate.forward(x: wo.dot(x) + ro.dot(prevY) + bo)
         
         let newCell = inputGateValue.multiply(inputActivationValue) + prevCell.multiply(forgetGateValue)
         let y = cellActivation.forward(x: newCell).multiply(outputGateValue)

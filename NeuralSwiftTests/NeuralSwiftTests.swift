@@ -184,7 +184,6 @@ class NeuralSwiftTests: XCTestCase {
         let target = Vector(array: [-1.0, 3.3, 0.5, 0.2])
         let result2 = layer.backward(y: result, delta: result - target)
         print(result2)
-        print("dddddd")
     }
     
     func testSigmoidLayer() {
@@ -199,7 +198,6 @@ class NeuralSwiftTests: XCTestCase {
         let target = Vector(array: [-1.0, 3.3, 0.5, 0.2])
         let result2 = layer.backward(y: result, delta: result - target)
         print(result2)
-        print("dddddd")
     }
     
     func testSoftmaxLayer() {
@@ -218,7 +216,6 @@ class NeuralSwiftTests: XCTestCase {
         print(result - target)
         let result2 = layer.backward(y: result, delta: result - target)
         print(result2)
-        print("dddddd")
     }
     
     func testNNQuery() {
