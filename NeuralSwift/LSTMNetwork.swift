@@ -8,14 +8,6 @@
 
 import Foundation
 
-extension Array {
-    func chunks(_ chunkSize: Int) -> [[Element]] {
-        return stride(from: 0, to: self.count, by: chunkSize).map {
-            Array(self[$0..<Swift.min($0 + chunkSize, self.count)])
-        }
-    }
-}
-
 // @see https://medium.com/@aidangomez/let-s-do-this-f9b699de31d9
 public class LSTMNetwork {
 

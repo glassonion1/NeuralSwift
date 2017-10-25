@@ -88,7 +88,7 @@ class LSTMTests: XCTestCase {
     
     func testLSTMNetwork() {
         let inputData = [[1.0, 2.0], [0.5, 3.0]]
-        var lstmNetwork = LSTMNetwork(sequenceSize: inputData.count,
+        let lstmNetwork = LSTMNetwork(sequenceSize: inputData.count,
                               inputDataLength: 2,
                               outputDataLength: 1,
                               learningRate: 0.1)
@@ -161,7 +161,7 @@ class LSTMTests: XCTestCase {
     
     func testLstmTrainSinWave() {
         
-        let steps = 100
+        let steps = 500
         let cycles = 5
         let length = steps * cycles + 1
         var samples = [[Double]]()
@@ -173,18 +173,7 @@ class LSTMTests: XCTestCase {
             str += "\(data[0])\n"
         }
         
-        /*
-        let length = 500
-        var samples = [[Double]]()
-        var str = ""
-        for n in 0..<length {
-            // sin curve on 0 ot 1
-            let data = [sin(Double.pi / 180 * Double(n)) * 0.5 + 0.5]
-            samples.append(data)
-            str += "\(data[0])\n"
-        }*/
-        
-        print(str)
+        //print(str)
         
         let sequenceSize = 8
         let dataSize = 1
@@ -199,152 +188,33 @@ class LSTMTests: XCTestCase {
         let epoch = 500
         for e in 0..<epoch {
             let loss = rnn.train(inputLists: dataList, targetLists: targetDataList)
-            //lossData += "\(loss)\n"
             if e % 100 == 0 {
                 print("Epoch:\(e)")
             }
             print(loss)
         }
         
-        //print(lossData)
         print("%%%%%%%%%%%%%%%%%")
         
         var str2 = ""
         let testList = dataList.chunks(sequenceSize)
         for test in testList {
             let results = rnn.query(lists: test)
-            for result in results {
-                str2 += "\(result[0])\n"
-            }
-            //str2 += "\(results[results.count - 1][0])\n"
+            str2 += "\(results[results.count - 1][0])\n"
         }
         print(str2)
         
         /*
         var str2 = ""
-        var test = [[0.5], [0.5087262032186417], [0.51744974835125046], [0.52616797812147187]]
+        var test = dataList.chunks(sequenceSize).first!
         for _ in 0..<500 {
             test = rnn.query(lists: test)
             for result in test {
                 str2 += "\(result[0])\n"
             }
+            //str2 += "\(test[test.count - 1][0])\n"
         }
         print(str2)*/
-    }
-    
-    func _testLstmTrain() {
-        
-        let steps = 50
-        let cycles = 100
-        let length = steps * cycles + 1
-        var samples = [[Double]]()
-        var str = ""
-        for n in 0..<length {
-            // sin curve on 0 ot 1
-            let data = [sin(Double(n) * (2 * Double.pi / Double(steps)))]
-            samples.append(data)
-            str += "\(data)\n"
-        }
-        
-        //print(str)
-        
-        let sequenceSize = 8
-        let dataSize = 1
-        
-        let dataList = Array(samples.dropLast()).chunks(sequenceSize)
-        let targetDataList = Array(samples.dropFirst()).chunks(sequenceSize)
-        
-        var rnn = LSTMNetwork(sequenceSize: sequenceSize,
-                              inputDataLength: dataSize,
-                              outputDataLength: dataSize,
-                              learningRate: 0.03)
-        let epoch = 100
-        var lossData = ""
-        for e in 0..<epoch {
-            
-            for i in 0..<dataList.count {
-                let data = dataList[i]
-                let targetData = targetDataList[i]
-                let loss = rnn.train(inputLists: data, targetLists: targetData)
-                lossData += "\(loss)\n"
-            }
-            print("Epoch:\(e)")
-        }
-        
-        //print(lossData)
-        print("%%%%%%%%%%%%%%%%%")
-        
-        var str2 = ""
-        for i in 0..<dataList.count {
-            let test = dataList[i]
-            let results = rnn.query(lists: test)
-            str2 += "\(results[sequenceSize - 1][0])\n"
-        }
-        print(str2)
-    }
-    
-    func _testLstmTrain2() {
-        
-        let steps = 50
-        let cycles = 100
-        let length = steps * cycles + 1
-        var samples = [Double]()
-        var str = ""
-        for n in 0..<length {
-            // sin curve on 0 ot 1
-            let data = sin(Double(n) * (2 * Double.pi / Double(steps)))
-            samples.append(data)
-            str += "\(data)\n"
-        }
-        
-        //print(str)
-        
-        let sequenceSize = 8
-        let dataSize = 1
-        
-        let t0 = Array(samples.dropLast(sequenceSize - 1))
-        let t1 = Array(samples.dropFirst())
-        let t2 = Array(samples.dropFirst(2))
-        let t3 = Array(samples.dropFirst(3))
-        let t4 = Array(samples.dropFirst(4))
-        let t5 = Array(samples.dropFirst(5))
-        let t6 = Array(samples.dropFirst(6))
-        let t7 = Array(samples.dropFirst(sequenceSize - 1))
-        var data = [[[Double]]]()
-        
-        for i in 0..<t0.count {
-            data.append([[t0[i]], [t1[i]], [t2[i]], [t3[i]], [t4[i]], [t5[i]], [t6[i]], [t7[i]]])
-        }
-        
-        let dataList = Array(data.dropLast())
-        let targetDataList = Array(data.dropFirst())
-        
-        var rnn = LSTMNetwork(sequenceSize: sequenceSize,
-                              inputDataLength: dataSize,
-                              outputDataLength: dataSize,
-                              learningRate: 0.03)
-        let epoch = 100
-        var lossData = ""
-        for e in 0..<epoch {
-            for i in 0..<dataList.count {
-                let data = dataList[i]
-                let targetData = targetDataList[i]
-                let loss = rnn.train(inputLists: data, targetLists: targetData)
-                lossData += "\(loss)\n"
-            }
-            print("Epoch:\(e)")
-        }
-        
-        //print(lossData)
-        print("%%%%%%%%%%%%%%%%%")
-        
-        var str2 = ""
-        for i in 0..<(length - sequenceSize) {
-            let test = dataList[i]
-            let results = rnn.query(lists: test)
-            str2 += "\(results[sequenceSize - 1][0])\n"
-        }
-        print(str2)
     }
     
     func _testLstmTrainZundoko() {
@@ -354,7 +224,7 @@ class LSTMTests: XCTestCase {
         // ズン ズン ズン ズン ドコ ドコ ドコ ズン
         let x: [[Double]] = [[0,1], [0,1], [0,1], [0,1], [1,0], [1,0], [1,0], [0,1]]
         
-        var lstm = LSTMNetwork(sequenceSize: x.count,
+        let lstm = LSTMNetwork(sequenceSize: x.count,
                                inputDataLength: 2,
                                outputDataLength: 1,
                                learningRate: 0.03)

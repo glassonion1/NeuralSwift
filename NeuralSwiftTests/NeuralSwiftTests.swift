@@ -11,14 +11,6 @@ import Accelerate
 import GameplayKit
 @testable import NeuralSwift
 
-extension Array {
-    func chunks(_ chunkSize: Int) -> [[Element]] {
-        return stride(from: 0, to: self.count, by: chunkSize).map {
-            Array(self[$0..<Swift.min($0 + chunkSize, self.count)])
-        }
-    }
-}
-
 class NeuralSwiftTests: XCTestCase {
     
     override func setUp() {
@@ -241,7 +233,7 @@ class NeuralSwiftTests: XCTestCase {
     }
     
     func testQuery() {
-        var nn = NeuralNetwork(inputLayerSize: 3, hiddenLayerSize: 3, outputLayerSize: 3, learningRate: 0.3)
+        let nn = NeuralNetwork(inputLayerSize: 3, hiddenLayerSize: 3, outputLayerSize: 3, learningRate: 0.3)
         nn.w1 = Matrix(array: [[0.9, 0.3, 0.4], [0.2, 0.8, 0.2], [0.1, 0.5, 0.6]])
         nn.w2 = Matrix(array: [[0.3, 0.7, 0.5], [0.6, 0.5, 0.2], [0.8, 0.1, 0.9]])
         let outputs = nn.query(list: [0.9, 0.1, 0.8])
@@ -255,7 +247,7 @@ class NeuralSwiftTests: XCTestCase {
         let inputs = [0.4, 0.4, 0.4]
         let targets = [0.94, 0.45, 1.2]
         
-        var nn = NeuralNetwork(inputLayerSize: inputs.count,
+        let nn = NeuralNetwork(inputLayerSize: inputs.count,
                                hiddenLayerSize: 3,
                                outputLayerSize: targets.count,
                                learningRate: 0.1)
@@ -276,7 +268,7 @@ class NeuralSwiftTests: XCTestCase {
             assertionFailure()
             return
         }
-        var nn = NeuralNetwork(inputLayerSize: 28 * 28,
+        let nn = NeuralNetwork(inputLayerSize: 28 * 28,
                                hiddenLayerSize: 100,
                                outputLayerSize: 10,
                                learningRate: 0.3)
