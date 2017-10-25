@@ -10,7 +10,9 @@ import Foundation
 
 public protocol Layer {
     
-    func forward(x: Vector) -> Vector
+    var value: Vector { get }
     
-    func backward(y: Vector, delta: Vector) -> Vector
+    func forward(x: Vector)
+    
+    func backward(delta: Vector)
 }

@@ -23,20 +23,20 @@ class LSTMTests: XCTestCase {
     
     func testLSTM() {
         
-        var wf = Matrix(array: [[0.7, 0.45]])
-        var wi = Matrix(array: [[0.95, 0.8]])
-        var wo = Matrix(array: [[0.6, 0.4]])
-        var wa = Matrix(array: [[0.45, 0.25]])
+        let wf = Matrix(array: [[0.7, 0.45]])
+        let wi = Matrix(array: [[0.95, 0.8]])
+        let wo = Matrix(array: [[0.6, 0.4]])
+        let wa = Matrix(array: [[0.45, 0.25]])
         
-        var rf = Matrix(array: [0.1])
-        var ri = Matrix(array: [0.8])
-        var ro = Matrix(array: [0.25])
-        var ra = Matrix(array: [0.15])
+        let rf = Matrix(array: [0.1])
+        let ri = Matrix(array: [0.8])
+        let ro = Matrix(array: [0.25])
+        let ra = Matrix(array: [0.15])
         
-        var bf = Vector(value: 0.15, rows: rf.rows)
-        var bi = Vector(value: 0.65, rows: ri.rows)
-        var bo = Vector(value: 0.1, rows: ro.rows)
-        var ba = Vector(value: 0.2, rows: ra.rows)
+        let bf = Vector(value: 0.15, rows: rf.rows)
+        let bi = Vector(value: 0.65, rows: ri.rows)
+        let bo = Vector(value: 0.1, rows: ro.rows)
+        let ba = Vector(value: 0.2, rows: ra.rows)
         
         var lstmList = [LSTM]()
         for _ in 0..<2 {
@@ -84,68 +84,6 @@ class LSTMTests: XCTestCase {
         let backward1 = lstmList[0].backward(deltaX: deltaX, recurrentOut: bState, nextForget: next.forgetGateValue)
         let bExpected1 = backward1.0.toArray()
         XCTAssertEqual(bExpected1[0], -0.00343, accuracy: 0.0001)
-        
-        // Update weights
-        let learningRate = 0.1
-        let x = [input, input1]
-        let y = [forward.0, forward1.0]
-        let deltas = [backward1.2, backward.2]
-        
-        var dWa = Matrix(value: 0, rows: wa.rows, cols: wa.cols)
-        var dWi = Matrix(value: 0, rows: wi.rows, cols: wi.cols)
-        var dWf = Matrix(value: 0, rows: wf.rows, cols: wf.cols)
-        var dWo = Matrix(value: 0, rows: wo.rows, cols: wo.cols)
-        for i in 0..<x.count {
-            let delta = deltas[i]
-            let xT = x[i].transpose()
-            
-            dWa = dWa + delta["deltaA"]!.outer(xT)
-            dWi = dWi + delta["deltaI"]!.outer(xT)
-            dWf = dWf + delta["deltaF"]!.outer(xT)
-            dWo = dWo + delta["deltaO"]!.outer(xT)
-        }
-        wa = wa - learningRate * dWa
-        wi = wi - learningRate * dWi
-        wf = wf - learningRate * dWf
-        wo = wo - learningRate * dWo
-        
-        var dRa = Matrix(value: 0, rows: ra.rows, cols: ra.cols)
-        var dRi = Matrix(value: 0, rows: ri.rows, cols: ri.cols)
-        var dRf = Matrix(value: 0, rows: rf.rows, cols: rf.cols)
-        var dRo = Matrix(value: 0, rows: ro.rows, cols: ro.cols)
-        
-        for i in 0..<y.count - 1 {
-            let delta = deltas[i + 1]
-            let yT = y[i].transpose()
-            
-            dRa = dRa + delta["deltaA"]!.outer(yT)
-            dRi = dRi + delta["deltaI"]!.outer(yT)
-            dRf = dRf + delta["deltaF"]!.outer(yT)
-            dRo = dRo + delta["deltaO"]!.outer(yT)
-        }
-        
-        ra = ra - learningRate * dRa
-        ri = ri - learningRate * dRi
-        rf = rf - learningRate * dRf
-        ro = ro - learningRate * dRo
-        
-        var dBa = Vector(value: 0, rows: ra.rows)
-        var dBi = Vector(value: 0, rows: ri.rows)
-        var dBf = Vector(value: 0, rows: rf.rows)
-        var dBo = Vector(value: 0, rows: ro.rows)
-        for i in 0..<x.count {
-            let delta = deltas[i]
-            dBa = dBa + delta["deltaA"]!
-            dBi = dBi + delta["deltaI"]!
-            dBf = dBf + delta["deltaF"]!
-            dBo = dBo + delta["deltaO"]!
-        }
-        ba = ba - learningRate * dBa
-        bi = bi - learningRate * dBi
-        bf = bf - learningRate * dBf
-        bo = bo - learningRate * dBo
-        
-        print("----")
     }
     
     func testLSTMNetwork() {
@@ -178,7 +116,7 @@ class LSTMTests: XCTestCase {
         XCTAssertEqual(result[1][0], 0.77198, accuracy: 0.0001)
 
         let labels = [[0.5], [1.25]]
-        _ = lstmNetwork.train2(inputLists: inputData, targetLists: labels)
+        _ = lstmNetwork.train(inputLists: inputData, targetLists: labels)
         
         let wa = lstmNetwork.wa.toArray()
         XCTAssertEqual(wa[0], 0.45267, accuracy: 0.0001)
@@ -221,21 +159,21 @@ class LSTMTests: XCTestCase {
         XCTAssertEqual(bo[0], 0.10536, accuracy: 0.0001)
     }
     
-    func _testLstmTrainSinWave() {
-        /*
-        let steps = 50
-        let cycles = 100
+    func testLstmTrainSinWave() {
+        
+        let steps = 100
+        let cycles = 5
         let length = steps * cycles + 1
         var samples = [[Double]]()
         var str = ""
         for n in 0..<length {
             // sin curve on 0 ot 1
-            let data = [sin(Double(n) * (2 * Double.pi / Double(steps)))]
+            let data = [sin(Double(n) * (2 * Double.pi / Double(steps))) * 0.5 + 0.5]
             samples.append(data)
             str += "\(data[0])\n"
         }
-        */
         
+        /*
         let length = 500
         var samples = [[Double]]()
         var str = ""
@@ -243,10 +181,10 @@ class LSTMTests: XCTestCase {
             // sin curve on 0 ot 1
             let data = [sin(Double.pi / 180 * Double(n)) * 0.5 + 0.5]
             samples.append(data)
-            str += "\(data)\n"
-        }
+            str += "\(data[0])\n"
+        }*/
         
-        //print(str)
+        print(str)
         
         let sequenceSize = 8
         let dataSize = 1
@@ -254,26 +192,31 @@ class LSTMTests: XCTestCase {
         let dataList = Array(samples.dropLast())
         let targetDataList = Array(samples.dropFirst())
         
-        var rnn = LSTMNetwork(sequenceSize: sequenceSize,
+        let rnn = LSTMNetwork(sequenceSize: sequenceSize,
                               inputDataLength: dataSize,
                               outputDataLength: dataSize,
                               learningRate: 0.1)
-        let epoch = 1000
-        var lossData = ""
+        let epoch = 500
         for e in 0..<epoch {
-            let loss = rnn.train2(inputLists: dataList, targetLists: targetDataList)
-            lossData += "\(loss)\n"
-            print("Epoch:\(e)")
+            let loss = rnn.train(inputLists: dataList, targetLists: targetDataList)
+            //lossData += "\(loss)\n"
+            if e % 100 == 0 {
+                print("Epoch:\(e)")
+            }
+            print(loss)
         }
         
-        print(lossData)
+        //print(lossData)
         print("%%%%%%%%%%%%%%%%%")
         
         var str2 = ""
         let testList = dataList.chunks(sequenceSize)
         for test in testList {
             let results = rnn.query(lists: test)
-            str2 += "\(results[results.count - 1][0])\n"
+            for result in results {
+                str2 += "\(result[0])\n"
+            }
+            //str2 += "\(results[results.count - 1][0])\n"
         }
         print(str2)
         

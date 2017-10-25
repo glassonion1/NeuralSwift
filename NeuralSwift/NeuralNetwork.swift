@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct NeuralNetwork {
+public class NeuralNetwork {
 
     private let learningRate: Double
     
@@ -25,39 +25,41 @@ public struct NeuralNetwork {
         w1 = Matrix(rows: hiddenLayerSize, cols: inputLayerSize)
         w2 = Matrix(rows: outputLayerSize, cols: hiddenLayerSize)
         
-        hiddenLayer = SigmoidLayer()
-        outputLayer = SigmoidLayer()
+        hiddenLayer = SigmoidLayer(value: Vector(value: 0.0, rows: w1.rows))
+        outputLayer = SigmoidLayer(value: Vector(value: 0.0, rows: w2.rows))
     }
     
     public func query(list: [Double]) -> [Double] {
         let inputs = Vector(array: list)
         
-        let hiddenOutputs = hiddenLayer.forward(x: w1 * inputs)
+        hiddenLayer.forward(x: w1 * inputs)
         
-        let finalOutputs = outputLayer.forward(x: w2 * hiddenOutputs)
+        outputLayer.forward(x: w2 * hiddenLayer.value)
         
-        return finalOutputs.toArray()
+        return outputLayer.value.toArray()
     }
     
-    public mutating func train(inputList: [Double], targetList: [Double]) -> Double {
+    public func train(inputList: [Double], targetList: [Double]) -> Double {
         
         let inputs = Vector(array: inputList)
         
-        let hiddenOutputs = hiddenLayer.forward(x: w1 * inputs)
+        hiddenLayer.forward(x: w1 * inputs)
         
-        let finalOutputs = outputLayer.forward(x: w2 * hiddenOutputs)
+        outputLayer.forward(x: w2 * hiddenLayer.value)
         
         let targets = Vector(array: targetList)
         
-        let outputErrors = finalOutputs - targets
+        let outputErrors = outputLayer.value - targets
         let hiddenErros = w2.transpose().dot(outputErrors)
         
         // Update weight2
-        let deltaOutput = outputLayer.backward(y: finalOutputs, delta: outputErrors) * hiddenOutputs.transpose()
+        outputLayer.backward(delta: outputErrors)
+        let deltaOutput = outputLayer.value * hiddenLayer.value.transpose()
         w2 = w2 - deltaOutput * learningRate
         
         // Update weight1
-        let deltaHidden = hiddenLayer.backward(y: hiddenOutputs, delta: hiddenErros) * inputs.transpose()
+        hiddenLayer.backward(delta: hiddenErros)
+        let deltaHidden =  hiddenLayer.value * inputs.transpose()
         w1 = w1 - deltaHidden * learningRate
         
         return sum(outputErrors.multiply(outputErrors) * 0.5) / Double(targetList.count)

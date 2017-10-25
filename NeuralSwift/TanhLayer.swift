@@ -8,16 +8,19 @@
 
 import Foundation
 
-public struct TanhLayer: Layer {
+public class TanhLayer: Layer {
     
-    public init() {
+    public private(set) var value: Vector
+    
+    public init(value: Vector) {
+        self.value = value
     }
     
-    public func forward(x: Vector) -> Vector {
-        return tanh(x)
+    public func forward(x: Vector) {
+        value = tanh(x)
     }
     
-    public func backward(y: Vector, delta: Vector) -> Vector {
-        return delta.multiply(1.0 - square(y))
+    public func backward(delta: Vector) {
+        value = delta.multiply(1.0 - square(value))
     }
 }

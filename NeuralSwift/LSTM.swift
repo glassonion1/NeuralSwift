@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct LSTM {
+public class LSTM {
     
     var forgetGate: Layer
     var inputGate: Layer
@@ -17,12 +17,7 @@ public struct LSTM {
     var cellActivation: Layer
     
     var forgetGateValue: Vector
-    var inputGateValue: Vector
-    var outputGateValue: Vector
-    var inputActivationValue: Vector
-    
     var prevCell: Vector
-    var cell: Vector
     
     // weight for forget gate
     var wf: Matrix
@@ -68,22 +63,17 @@ public struct LSTM {
         self.bo = bo
         self.ba = ba
         
-        forgetGate = SigmoidLayer()
-        inputGate = SigmoidLayer()
-        outputGate = SigmoidLayer()
-        inputActivation = TanhLayer()
-        cellActivation = TanhLayer()
+        forgetGate = SigmoidLayer(value: Vector(value: 0.0, rows: wf.rows))
+        inputGate = SigmoidLayer(value: Vector(value: 0.0, rows: wf.rows))
+        outputGate = SigmoidLayer(value: Vector(value: 0.0, rows: wf.rows))
+        inputActivation = TanhLayer(value: Vector(value: 0.0, rows: wf.rows))
+        cellActivation = TanhLayer(value: Vector(value: 0.0, rows: wf.rows))
         
         forgetGateValue = Vector(value: 0.0, rows: wf.rows)
-        inputGateValue = Vector(value: 0.0, rows: wf.rows)
-        outputGateValue = Vector(value: 0.0, rows: wf.rows)
-        inputActivationValue = Vector(value: 0.0, rows: wf.rows)
-        
         prevCell = Vector(value: 0.0, rows: rf.cols)
-        cell = Vector(value: 0.0, rows: rf.cols)
     }
     
-    init(wf: Matrix, wi: Matrix, wo: Matrix, wa: Matrix, rf: Matrix, ri: Matrix, ro: Matrix, ra: Matrix) {
+    convenience init(wf: Matrix, wi: Matrix, wo: Matrix, wa: Matrix, rf: Matrix, ri: Matrix, ro: Matrix, ra: Matrix) {
         let bf = Vector(value: 1.0, rows: rf.rows)
         let bi = Vector(value: 0.0, rows: ri.rows)
         let bo = Vector(value: 0.0, rows: ro.rows)
@@ -91,7 +81,7 @@ public struct LSTM {
         self.init(wf: wf, wi: wi, wo: wo, wa: wa, rf: rf, ri: ri, ro: ro, ra: ra, bf: bf, bi: bi, bo: bo, ba: ba)
     }
     
-    mutating func forward(x: Vector, state: (Vector, Vector)) -> (Vector, Vector) {
+    func forward(x: Vector, state: (Vector, Vector)) -> (Vector, Vector) {
         
         assert(x.rows == wf.cols)
         assert(state.0.rows == wf.rows)
@@ -100,52 +90,54 @@ public struct LSTM {
         let prevY = state.0
         prevCell = state.1
         
-        inputActivationValue = inputActivation.forward(x: wa.dot(x) + ra.dot(prevY) + ba)
-        inputGateValue = inputGate.forward(x: wi.dot(x) + ri.dot(prevY) + bi)
-        forgetGateValue = forgetGate.forward(x: wf.dot(x) + rf.dot(prevY) + bf)
-        outputGateValue = outputGate.forward(x: wo.dot(x) + ro.dot(prevY) + bo)
+        inputActivation.forward(x: wa.dot(x) + ra.dot(prevY) + ba)
+        inputGate.forward(x: wi.dot(x) + ri.dot(prevY) + bi)
+        forgetGate.forward(x: wf.dot(x) + rf.dot(prevY) + bf)
+        outputGate.forward(x: wo.dot(x) + ro.dot(prevY) + bo)
         
-        let newCell = inputGateValue.multiply(inputActivationValue) + prevCell.multiply(forgetGateValue)
-        let y = cellActivation.forward(x: newCell).multiply(outputGateValue)
+        let cell = inputGate.value.multiply(inputActivation.value) + prevCell.multiply(forgetGate.value)
+        cellActivation.forward(x: cell)
+        let y = cellActivation.value.multiply(outputGate.value)
         
-        self.cell = newCell
-        return (y, newCell)
+        forgetGateValue = forgetGate.value
+        return (y, cell)
     }
     
-    func backward(deltaX: Vector, recurrentOut: (Vector, Vector), nextForget: Vector) -> (Vector, Vector, [String: Vector]) {
+    func backward(deltaX: Vector, recurrentOut: (Vector, Vector), nextForget: Vector) -> (Vector, Vector) {
         let recurrentDeltaY = recurrentOut.0
         let recurrentDeltaCell = recurrentOut.1
         
         let delta = deltaX + recurrentDeltaY
-        let dCell = cellActivation.backward(y: tanh(cell), delta: delta.multiply(outputGateValue))
-            + recurrentDeltaCell.multiply(nextForget)
         
-        let dInputActivation = inputActivation.backward(y: inputActivationValue, delta: dCell.multiply(inputGateValue))
-        let dInputGate = inputGate.backward(y: inputGateValue, delta: dCell.multiply(inputActivationValue))
-        let dForgetGate = forgetGate.backward(y: forgetGateValue, delta: dCell.multiply(prevCell))
-        let dOutputGate = outputGate.backward(y: outputGateValue, delta: delta.multiply(tanh(cell)))
+        // it caches value before layers backward
+        let cellActivationValue = cellActivation.value
+        let inputActivationValue = inputActivation.value
+        let inputGateValue = inputGate.value
+        
+        cellActivation.backward(delta: delta.multiply(outputGate.value))
+        let dCell = cellActivation.value + recurrentDeltaCell.multiply(nextForget)
+        
+        inputActivation.backward(delta: dCell.multiply(inputGateValue))
+        inputGate.backward(delta: dCell.multiply(inputActivationValue))
+        forgetGate.backward(delta: dCell.multiply(prevCell))
+        outputGate.backward(delta: delta.multiply(cellActivationValue))
         
         /* for debugging
-        let dWInputActivation = wa.transpose() * dInputActivation
-        let dWInputGate = wi.transpose() * dInputGate
-        let dWForgetGate  = wf.transpose() * dForgetGate
-        let dWOutputGate  = wo.transpose() * dOutputGate
+        let dWInputActivation = wa.transpose() * inputActivation.value
+        let dWInputGate = wi.transpose() * inputGate.value
+        let dWForgetGate  = wf.transpose() * forgetGate.value
+        let dWOutputGate  = wo.transpose() * outputGate.value
         
         let dX = dWInputActivation + dWInputGate + dWForgetGate + dWOutputGate
         */
         
-        let dRInputActivation = ra.transpose() * dInputActivation
-        let dRInputGate = ri.transpose() * dInputGate
-        let dRForgetGate  = rf.transpose() * dForgetGate
-        let dROutputGate  = ro.transpose() * dOutputGate
+        let dRInputActivation = ra.transpose() * inputActivation.value
+        let dRInputGate = ri.transpose() * inputGate.value
+        let dRForgetGate  = rf.transpose() * forgetGate.value
+        let dROutputGate  = ro.transpose() * outputGate.value
         
         let dY = dRInputActivation + dRInputGate + dRForgetGate + dROutputGate
         
-        let dictionary = ["deltaA": dInputActivation,
-                          "deltaI": dInputGate,
-                          "deltaF": dForgetGate,
-                          "deltaO": dOutputGate]
-        
-        return (dY, dCell, dictionary)
+        return (dY, dCell)
     }
 }

@@ -8,17 +8,20 @@
 
 import Foundation
 
-public struct SigmoidLayer: Layer {
+public class SigmoidLayer: Layer {
     
-    public init() {
+    public private(set) var value: Vector
+    
+    public init(value: Vector) {
+        self.value = value
     }
     
     // http://pythonskywalker.hatenablog.com/entry/2016/12/24/093705
-    public func forward(x: Vector) -> Vector {
-        return sigmoid(x)
+    public func forward(x: Vector) {
+        value = sigmoid(x)
     }
     
-    public func backward(y: Vector, delta: Vector) -> Vector {
-        return delta.multiply(y).multiply(1.0 - y)
+    public func backward(delta: Vector) {
+        value = delta.multiply(value).multiply(1.0 - value)
     }
 }

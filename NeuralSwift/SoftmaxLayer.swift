@@ -8,13 +8,16 @@
 
 import Foundation
 
-public struct SoftmaxLayer: Layer {
+public class SoftmaxLayer: Layer {
     
-    public init() {
+    public private(set) var value: Vector
+    
+    public init(value: Vector) {
+        self.value = value
     }
     
-    public func forward(x: Vector) -> Vector {
-        return softmax(x)
+    public func forward(x: Vector) {
+        value = softmax(x)
     }
     
     // see: https://github.com/rasmusbergpalm/DeepLearnToolbox/issues/113
@@ -23,9 +26,9 @@ public struct SoftmaxLayer: Layer {
         return delta / Double(y.rows)
     }*/
     
-    public func backward(y: Vector, delta: Vector) -> Vector {
-        let deltaX = y.multiply(delta)
+    public func backward(delta: Vector) {
+        let deltaX = value.multiply(delta)
         let sumdx = sum(deltaX)
-        return deltaX - y * sumdx
+        value = deltaX - value * sumdx
     }
 }

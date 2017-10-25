@@ -173,8 +173,9 @@ class NeuralSwiftTests: XCTestCase {
     
     func testTanhLayer() {
         let data = Vector(array: [-1.0, 3.3, 5.0, 0.2])
-        let layer = TanhLayer()
-        let result = layer.forward(x: data)
+        let layer = TanhLayer(value: data)
+        layer.forward(x: data)
+        let result = layer.value
         print(result)
         XCTAssertEqual(result[0], -0.76159415595576485, accuracy: 0.000000001)
         XCTAssertEqual(result[1], 0.99728296009914208, accuracy: 0.000000001)
@@ -182,28 +183,32 @@ class NeuralSwiftTests: XCTestCase {
         XCTAssertEqual(result[3], 0.19737532022490401, accuracy: 0.000000001)
         
         let target = Vector(array: [-1.0, 3.3, 0.5, 0.2])
-        let result2 = layer.backward(y: result, delta: result - target)
+        layer.backward(delta: result - target)
+        let result2 = layer.value.toArray()
         print(result2)
     }
     
     func testSigmoidLayer() {
         let data = Vector(array: [-1.0, 3.3, 5.0, 0.2])
-        let layer = SigmoidLayer()
-        let result = layer.forward(x: data)
+        let layer = SigmoidLayer(value: data)
+        layer.forward(x: data)
+        let result = layer.value
         XCTAssertEqual(result[0], 0.268941421369995, accuracy: 0.000000001)
         XCTAssertEqual(result[1], 0.96442881, accuracy: 0.000000001)
         XCTAssertEqual(result[2], 0.99330715, accuracy: 0.000000001)
         XCTAssertEqual(result[3], 0.549833997312478, accuracy: 0.000000001)
         
         let target = Vector(array: [-1.0, 3.3, 0.5, 0.2])
-        let result2 = layer.backward(y: result, delta: result - target)
+        layer.backward(delta: result - target)
+        let result2 = layer.value.toArray()
         print(result2)
     }
     
     func testSoftmaxLayer() {
         let data = Vector(array: [-1.0, 3.3, 5.0, 0.2])
-        let layer = SoftmaxLayer()
-        let result = layer.forward(x: data)
+        let layer = SoftmaxLayer(value: data)
+        layer.forward(x: data)
+        let result = layer.value
         print(result)
         XCTAssertEqual(result[0], 0.0020770644753070051, accuracy: 0.000000001)
         XCTAssertEqual(result[1], 0.15307922333088542, accuracy: 0.000000001)
@@ -214,7 +219,8 @@ class NeuralSwiftTests: XCTestCase {
         
         let target = Vector(array: [-1.0, 3.3, 0.5, 0.2])
         print(result - target)
-        let result2 = layer.backward(y: result, delta: result - target)
+        layer.backward(delta: result - target)
+        let result2 = layer.value.toArray()
         print(result2)
     }
     
@@ -234,16 +240,6 @@ class NeuralSwiftTests: XCTestCase {
         XCTAssertNotEqual(result[2], result2[2], accuracy: 0.0001)
     }
     
-    func testForward() {
-        let weight = Matrix(array: [[0.9, 0.3, 0.4], [0.2, 0.8, 0.2], [0.1, 0.5, 0.6]])
-        let inputs = Vector(array: [0.9, 0.1, 0.8])
-        let layer = SigmoidLayer()
-        let outputs = layer.forward(x: weight * inputs)
-        XCTAssertEqual(outputs[0], 0.761, accuracy: 0.001)
-        XCTAssertEqual(outputs[1], 0.603, accuracy: 0.001)
-        XCTAssertEqual(outputs[2], 0.650, accuracy: 0.001)
-    }
-    
     func testQuery() {
         var nn = NeuralNetwork(inputLayerSize: 3, hiddenLayerSize: 3, outputLayerSize: 3, learningRate: 0.3)
         nn.w1 = Matrix(array: [[0.9, 0.3, 0.4], [0.2, 0.8, 0.2], [0.1, 0.5, 0.6]])
@@ -253,16 +249,6 @@ class NeuralSwiftTests: XCTestCase {
         XCTAssertEqual(outputs[0], 0.726, accuracy: 0.001)
         XCTAssertEqual(outputs[1], 0.708, accuracy: 0.001)
         XCTAssertEqual(outputs[2], 0.778, accuracy: 0.001)
-    }
-    
-    func testBackpropagation() {
-        let inputs = Vector(array: [0.4, 0.4, 0.4])
-        let outputs = sigmoid(Vector(array: [2.3, 2.3, 2.3]))
-        let errors = Vector(array: [0.8, 0.8, 0.8])
-        let layer = SigmoidLayer()
-        let results = layer.backward(y: outputs, delta: errors) * inputs.transpose()
-        print(results)
-        XCTAssertEqual(results[0, 0], 0.02650, accuracy: 0.00001)
     }
     
     func testTrain() {
@@ -275,7 +261,7 @@ class NeuralSwiftTests: XCTestCase {
                                learningRate: 0.1)
         //nn.w1 = Matrix(array: [[2.0, 2.0, 2.0], [2.0, 2.0, 2.0], [2.0, 2.0, 2.0]])
         //nn.w2 = Matrix(array: [[2.0, 2.0, 2.0], [2.0, 2.0, 2.0], [2.0, 2.0, 2.0]])
-        nn.train(inputList: inputs, targetList: targets)
+        _ = nn.train(inputList: inputs, targetList: targets)
         print("**********")
         print(nn.w1)
         print(nn.w2)

@@ -17,7 +17,7 @@ extension Array {
 }
 
 // @see https://medium.com/@aidangomez/let-s-do-this-f9b699de31d9
-public struct LSTMNetwork {
+public class LSTMNetwork {
 
     let sequenceSize: Int
     
@@ -74,7 +74,7 @@ public struct LSTMNetwork {
         reset()
     }
     
-    mutating func reset() {
+    func reset() {
         var lstmList = [LSTM]()
         for _ in 0..<sequenceSize {
             lstmList.append(LSTM(wf: wf, wi: wi, wo: wo, wa: wa,
@@ -85,7 +85,7 @@ public struct LSTMNetwork {
     }
     
     // data: onehot vectors
-    public mutating func query(lists: [[Double]]) -> [[Double]] {
+    public func query(lists: [[Double]]) -> [[Double]] {
         
         let h = Vector(value: 0, rows: wf.rows)
         let cell = Vector(value: 0, rows: wf.rows)
@@ -97,107 +97,13 @@ public struct LSTMNetwork {
             state = lstms[i].forward(x: inputs, state: state)
             
             let output = state.0
-            //outputs.append(softmaxLayer.forward(x: wy * output).toArray())
             outputs.append(output.toArray())
         }
         
         return outputs
     }
     
-    public mutating func train(inputLists: [[Double]], targetLists: [[Double]]) -> Double {
-        let outputs = query(lists: inputLists)
-        
-        let dY = Vector(value: 0, rows: wf.rows)
-        let dCell = Vector(value: 0, rows: wf.rows)
-        var state = (dY, dCell)
-        var deltas = [[String: Vector]]()
-        var totalLoss = 0.0
-        
-        for i in (0..<lstms.count).reversed() {
-            let lstm = lstms[i]
-            let output = Vector(array: outputs[i])
-            let target = Vector(array: targetLists[i])
-            // a target is one hot vector like [0,1,0,0..0]
-            let deltaX = output - target
-            
-            let loss = target - output
-            let l2Loss = sum(loss.multiply(loss) * 0.5)
-            totalLoss += l2Loss
-            
-            
-            /*
-            let loss = sum(target.multiply(log(output))) * -1
-            totalLoss += loss
-            */
-            
-            let next = i + 1 > lstms.count - 1 ? LSTM(wf: wf, wi: wi, wo: wo, wa: wa, rf: rf, ri: ri, ro: ro, ra: ra) : lstms[i + 1]
-            let backward = lstm.backward(deltaX: deltaX, recurrentOut: state, nextForget: next.forgetGateValue)
-            state.0 = backward.0
-            state.1 = backward.1
-            deltas.append(backward.2)
-        }
-        deltas = deltas.reversed()
-        
-        var dBa = Vector(value: 0, rows: ra.rows)
-        var dBi = Vector(value: 0, rows: ri.rows)
-        var dBf = Vector(value: 0, rows: rf.rows)
-        var dBo = Vector(value: 0, rows: ro.rows)
-        
-        var dWa = Matrix(value: 0, rows: wa.rows, cols: wa.cols)
-        var dWi = Matrix(value: 0, rows: wi.rows, cols: wi.cols)
-        var dWf = Matrix(value: 0, rows: wf.rows, cols: wf.cols)
-        var dWo = Matrix(value: 0, rows: wo.rows, cols: wo.cols)
-        
-        for i in 0..<inputLists.count {
-            let delta = deltas[i]
-            let xT = Vector(array: inputLists[i]).transpose()
-            
-            dBa = dBa + delta["deltaA"]!
-            dBi = dBi + delta["deltaI"]!
-            dBf = dBf + delta["deltaF"]!
-            dBo = dBo + delta["deltaO"]!
-            
-            dWa = dWa + delta["deltaA"]!.outer(xT)
-            dWi = dWi + delta["deltaI"]!.outer(xT)
-            dWf = dWf + delta["deltaF"]!.outer(xT)
-            dWo = dWo + delta["deltaO"]!.outer(xT)
-        }
-        ba = ba - learningRate * dBa
-        bi = bi - learningRate * dBi
-        bf = bf - learningRate * dBf
-        bo = bo - learningRate * dBo
-        
-        wa = wa - learningRate * dWa
-        wi = wi - learningRate * dWi
-        wf = wf - learningRate * dWf
-        wo = wo - learningRate * dWo
-        
-        var dRa = Matrix(value: 0, rows: ra.rows, cols: ra.cols)
-        var dRi = Matrix(value: 0, rows: ri.rows, cols: ri.cols)
-        var dRf = Matrix(value: 0, rows: rf.rows, cols: rf.cols)
-        var dRo = Matrix(value: 0, rows: ro.rows, cols: ro.cols)
-        
-        for i in 0..<outputs.count - 1 {
-            let delta = deltas[i + 1]
-            let yT = Vector(array: outputs[i]).transpose()
-            
-            dRa = dRa + delta["deltaA"]!.outer(yT)
-            dRi = dRi + delta["deltaI"]!.outer(yT)
-            dRf = dRf + delta["deltaF"]!.outer(yT)
-            dRo = dRo + delta["deltaO"]!.outer(yT)
-        }
-        
-        ra = ra - learningRate * dRa
-        ri = ri - learningRate * dRi
-        rf = rf - learningRate * dRf
-        ro = ro - learningRate * dRo
-        
-        reset()
-        
-        return totalLoss / Double(outputs.count)
-    }
-    
-    public mutating func train2(inputLists: [[Double]], targetLists: [[Double]]) -> Double {
+    public func train(inputLists: [[Double]], targetLists: [[Double]]) -> Double {
         
         let xList = inputLists.chunks(sequenceSize)
         var tList = targetLists.chunks(sequenceSize)
@@ -206,7 +112,6 @@ public struct LSTMNetwork {
         var totalLoss = 0.0
         
         for x in xList {
-            var deltas = [[String: Vector]]()
             let y = query(lists: x)
             let t = tList.remove(at: 0)
             
@@ -224,26 +129,20 @@ public struct LSTMNetwork {
                 let lstm = lstms[i]
                 let output = Vector(array: y[i])
                 let target = Vector(array: t[i])
-                // a target is one hot vector like [0,1,0,0..0]
                 let deltaX = output - target
                 
                 let loss = target - output
                 let l2Loss = sum(loss.multiply(loss) * 0.5)
                 sequenceLoss += l2Loss
                 
-                /*
-                 let loss = sum(target.multiply(log(output))) * -1
-                 totalLoss += loss
-                 */
-                
                 let next = i + 1 == lstms.count ? LSTM(wf: wf, wi: wi, wo: wo, wa: wa, rf: rf, ri: ri, ro: ro, ra: ra) : lstms[i + 1]
                 let backward = lstm.backward(deltaX: deltaX, recurrentOut: state, nextForget: next.forgetGateValue)
                 state.0 = backward.0
                 state.1 = backward.1
-                deltas.insert(backward.2, at: 0)
             }
             totalLoss += sequenceLoss / Double(y.count)
             
+            // updates biases and weights
             var dBa = Vector(value: 0, rows: ra.rows)
             var dBi = Vector(value: 0, rows: ri.rows)
             var dBf = Vector(value: 0, rows: rf.rows)
@@ -253,21 +152,40 @@ public struct LSTMNetwork {
             var dWi = Matrix(value: 0, rows: wi.rows, cols: wi.cols)
             var dWf = Matrix(value: 0, rows: wf.rows, cols: wf.cols)
             var dWo = Matrix(value: 0, rows: wo.rows, cols: wo.cols)
+            
+            var dRa = Matrix(value: 0, rows: ra.rows, cols: ra.cols)
+            var dRi = Matrix(value: 0, rows: ri.rows, cols: ri.cols)
+            var dRf = Matrix(value: 0, rows: rf.rows, cols: rf.cols)
+            var dRo = Matrix(value: 0, rows: ro.rows, cols: ro.cols)
+            
             for i in 0..<x.count {
-                let delta = deltas[i]
+                let lstm = lstms[i]
                 
-                dBa = dBa + delta["deltaA"]!
-                dBi = dBi + delta["deltaI"]!
-                dBf = dBf + delta["deltaF"]!
-                dBo = dBo + delta["deltaO"]!
+                dBa = dBa + lstm.inputActivation.value
+                dBi = dBi + lstm.inputGate.value
+                dBf = dBf + lstm.forgetGate.value
+                dBo = dBo + lstm.outputGate.value
                 
                 let xT = Vector(array: x[i]).transpose()
                 
-                dWa = dWa + delta["deltaA"]!.outer(xT)
-                dWi = dWi + delta["deltaI"]!.outer(xT)
-                dWf = dWf + delta["deltaF"]!.outer(xT)
-                dWo = dWo + delta["deltaO"]!.outer(xT)
+                dWa = dWa + lstm.inputActivation.value.outer(xT)
+                dWi = dWi + lstm.inputGate.value.outer(xT)
+                dWf = dWf + lstm.forgetGate.value.outer(xT)
+                dWo = dWo + lstm.outputGate.value.outer(xT)
+                
+                if lstms.count - 1 == i {
+                    continue
+                }
+                
+                let nextLstm = lstms[i + 1]
+                let yT = Vector(array: y[i]).transpose()
+                
+                dRa = dRa + nextLstm.inputActivation.value.outer(yT)
+                dRi = dRi + nextLstm.inputGate.value.outer(yT)
+                dRf = dRf + nextLstm.forgetGate.value.outer(yT)
+                dRo = dRo + nextLstm.outputGate.value.outer(yT)
             }
+            
             ba = ba - learningRate * dBa
             bi = bi - learningRate * dBi
             bf = bf - learningRate * dBf
@@ -278,28 +196,13 @@ public struct LSTMNetwork {
             wf = wf - learningRate * dWf
             wo = wo - learningRate * dWo
             
-            var dRa = Matrix(value: 0, rows: ra.rows, cols: ra.cols)
-            var dRi = Matrix(value: 0, rows: ri.rows, cols: ri.cols)
-            var dRf = Matrix(value: 0, rows: rf.rows, cols: rf.cols)
-            var dRo = Matrix(value: 0, rows: ro.rows, cols: ro.cols)
-            
-            for i in 0..<y.count - 1 {
-                let delta = deltas[i + 1]
-                let yT = Vector(array: y[i]).transpose()
-                
-                dRa = dRa + delta["deltaA"]!.outer(yT)
-                dRi = dRi + delta["deltaI"]!.outer(yT)
-                dRf = dRf + delta["deltaF"]!.outer(yT)
-                dRo = dRo + delta["deltaO"]!.outer(yT)
-            }
-            
             ra = ra - learningRate * dRa
             ri = ri - learningRate * dRi
             rf = rf - learningRate * dRf
             ro = ro - learningRate * dRo
+            
+            reset()
         }
-        
-        reset()
         
         return totalLoss / Double(xList.count)
     }
