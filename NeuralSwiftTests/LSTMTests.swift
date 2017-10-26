@@ -172,7 +172,6 @@ class LSTMTests: XCTestCase {
             samples.append(data)
             str += "\(data[0])\n"
         }
-        
         //print(str)
         
         let sequenceSize = 8
@@ -185,7 +184,7 @@ class LSTMTests: XCTestCase {
                               inputDataLength: dataSize,
                               outputDataLength: dataSize,
                               learningRate: 0.1)
-        let epoch = 500
+        let epoch = 5//00000
         for e in 0..<epoch {
             let loss = rnn.train(inputLists: dataList, targetLists: targetDataList)
             if e % 100 == 0 {
@@ -196,59 +195,102 @@ class LSTMTests: XCTestCase {
         
         print("%%%%%%%%%%%%%%%%%")
         
+        /*
         var str2 = ""
         let testList = dataList.chunks(sequenceSize)
         for test in testList {
             let results = rnn.query(lists: test)
             str2 += "\(results[results.count - 1][0])\n"
         }
-        print(str2)
-        
-        /*
-        var str2 = ""
-        var test = dataList.chunks(sequenceSize).first!
-        for _ in 0..<500 {
-            test = rnn.query(lists: test)
-            for result in test {
-                str2 += "\(result[0])\n"
-            }
-            //str2 += "\(test[test.count - 1][0])\n"
-        }
         print(str2)*/
+        
+        var tmp = [[[Double]]]()
+        for i in 0..<sequenceSize {
+            let a = Array(Array(dataList.dropFirst(i)).dropLast(sequenceSize - i))
+            tmp.append(a)
+        }
+        var data = [[Double]]()
+        for i in 0..<tmp[0].count {
+            for j in 0..<sequenceSize {
+                data.append(tmp[j][i])
+            }
+        }
+        var str2 = ""
+        let testList = data.chunks(sequenceSize)
+        for test in testList {
+            let results = rnn.query(lists: test)
+            str2 += "\(results[results.count - 1][0])\n"
+        }
+        print(str2)
     }
     
-    func _testLstmTrainZundoko() {
+    func testLstmTrainZundoco() {
         
+        let sequenceSize = 8
         
-        
-        // ズン ズン ズン ズン ドコ ドコ ドコ ズン
-        let x: [[Double]] = [[0,1], [0,1], [0,1], [0,1], [1,0], [1,0], [1,0], [0,1]]
-        
-        let lstm = LSTMNetwork(sequenceSize: x.count,
+        let lstm = LSTMNetwork(sequenceSize: sequenceSize,
                                inputDataLength: 2,
-                               outputDataLength: 1,
-                               learningRate: 0.03)
+                               outputDataLength: 2,
+                               learningRate: 0.1)
         
-        
-        let result = lstm.query(lists: x)
-        print(result)
-        print(result.map { $0.index(of: $0.max()!)! })
-        print("dd")
-        
-        var kiyoshi = Kiyoshi()
-        for _ in 0..<1000 {
-            guard let k = kiyoshi.next() else {
-                continue
+        var pattern = PatternGenerator()
+        var data = [[Double]]()
+        var target = [[Double]]()
+        // create training data
+        for _ in 0..<5000 {
+            let k = pattern.next()!
+            data.append(k.0)
+            target.append(k.1)
+        }
+        let epoch = 100
+        for e in 0..<epoch {
+            let loss = lstm.train(inputLists: data, targetLists: target)
+            if e % 100 == 0 {
+                print("Epoch:\(e)")
             }
-            print(k)
+            print(loss)
+        }
+        
+        print("-----1-----")
+        // zun zun zun zun doco doco doco zun
+        var x: [[Double]] = [[0,1], [0,1], [0,1], [0,1], [1,0], [1,0], [1,0], [0,1]]
+        var y = lstm.query(lists: x)
+        for i in 0..<x.count {
+            print(x[i].index(of: x[i].max()!) == 0 ? "doco" : "zun")
+            print(y[i].index(of: y[i].max()!) == 0 ? "" : "kiyoshi!")
+        }
+        var expected = [0, 0, 0, 0, 1, 0, 0, 0]
+        for i in 0..<expected.count {
+            XCTAssertEqual(expected[i], y[i].index(of: y[i].max()!)!)
+        }
+        print("-----2-----")
+        x = [[0,1], [0,1], [0,1], [0,1], [0,1], [1,0], [0,1], [0,1]]
+        y = lstm.query(lists: x)
+        for i in 0..<x.count {
+            print(x[i].index(of: x[i].max()!) == 0 ? "doco" : "zun")
+            print(y[i].index(of: y[i].max()!) == 0 ? "" : "kiyoshi!")
+        }
+        expected = [0, 0, 0, 0, 0, 1, 0, 0]
+        for i in 0..<expected.count {
+            XCTAssertEqual(expected[i], y[i].index(of: y[i].max()!)!)
+        }
+        print("-----3-----")
+        x = [[1,0], [1,0], [0,1], [0,1], [0,1], [0,1], [1,0], [0,1]]
+        y = lstm.query(lists: x)
+        for i in 0..<x.count {
+            print(x[i].index(of: x[i].max()!) == 0 ? "doco" : "zun")
+            print(y[i].index(of: y[i].max()!) == 0 ? "" : "kiyoshi!")
+        }
+        expected = [0, 0, 0, 0, 0, 0, 1, 0]
+        for i in 0..<expected.count {
+            XCTAssertEqual(expected[i], y[i].index(of: y[i].max()!)!)
         }
     }
-    
 }
 
-struct Kiyoshi: IteratorProtocol {
+struct PatternGenerator: IteratorProtocol {
     
-    var element: ([Int], Int) = ([0, 0], 0)
+    var element: ([Double], [Double]) = ([0, 0], [0, 0])
     
     let answer = [0, 0, 0, 0, 1]
     let src = [0, 0, 0, 0, 1]
@@ -256,14 +298,14 @@ struct Kiyoshi: IteratorProtocol {
     var x = [0, 0, 0, 0, 1]
     var y = [0, 0, 0, 0, 1]
     
-    mutating func next() -> ([Int], Int)? {
+    mutating func next() -> ([Double], [Double])? {
         defer {
             let randomX = src[Int(arc4random_uniform(UInt32(src.count)))]
             x.append(randomX)
             y.append(x == answer ? 1 : 0)
         }
-        let newX = x.remove(at: 0) == 0 ? [0, 1] : [1, 0]
-        let newY = y.remove(at: 0)
+        let newX = x.remove(at: 0) == 0 ? [0.0, 1.0] : [1.0, 0.0]
+        let newY = y.remove(at: 0) == 0 ? [1.0, 0.0] : [0.0, 1.0]
         return (newX, newY)
     }
 }
